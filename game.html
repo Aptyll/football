@@ -91,6 +91,23 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px
 .btn:active{background:#fff}
 .btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .fail{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+
+/* replays: broadcast-style "REPLAY" bug, stinger wipe between live and replay, and a rewatch button during the play call */
+.rpbug{position:absolute;top:calc(env(safe-area-inset-top,0px) + 74px);left:var(--gl);display:flex;flex-direction:column;align-items:flex-start;gap:2px;pointer-events:none;font-family:var(--display);text-transform:uppercase}
+.rpbug b{font-weight:700;font-size:20px;letter-spacing:.1em;background:var(--gold);color:#111;padding:1px 9px}
+.rpbug span{font-weight:600;font-size:13px;letter-spacing:.12em;color:#fff;background:#0b101cd0;padding:1px 9px}
+.rpskip{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);text-align:center;font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#dfe6f3;text-shadow:0 1px 3px #000;pointer-events:none}
+.sting{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:grid;place-items:center}
+.sting i{position:absolute;top:-10%;bottom:-10%;left:-20%;width:140%;background:#0b101c;border-left:14px solid var(--gold);border-right:14px solid var(--gold);transform:translateX(-130%) skewX(-12deg)}
+.sting b{position:relative;font-family:var(--display);font-weight:700;font-size:clamp(34px,10vw,60px);letter-spacing:.14em;text-transform:uppercase;color:#fff;opacity:0}
+.sting.go i{animation:stingI .76s cubic-bezier(.5,0,.5,1) forwards}
+.sting.go b{animation:stingB .76s linear forwards}
+@keyframes stingI{0%{transform:translateX(-130%) skewX(-12deg)}40%,58%{transform:translateX(0) skewX(-12deg)}100%{transform:translateX(130%) skewX(-12deg)}}
+@keyframes stingB{0%,25%{opacity:0}40%,60%{opacity:1}75%,100%{opacity:0}}
+.rpbtn{position:absolute;top:calc(env(safe-area-inset-top,0px) + 46px);right:var(--gr);appearance:none;border:1px solid var(--line);background:#0e1524e0;color:var(--fg);font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.rpbtn:active{background:#22305a;border-color:var(--gold)}
+.rpbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.rpbtn svg{width:12px;height:12px;fill:var(--gold)}
 </style>
 
 <div class="app" id="app">
@@ -102,6 +119,10 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px
     <span class="dd" id="dd">1ST &amp; 10</span>
   </div></div>
   <div class="spot" id="spot">BALL ON OWN 25</div>
+  <div class="rpbug" id="rpBug" hidden><b>Replay</b><span id="rpAngle">End zone view</span></div>
+  <div class="rpskip" id="rpSkip" hidden>Tap to skip</div>
+  <button class="rpbtn" id="rpBtn" type="button" hidden><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0 9 5 1 10Z"/></svg>Replay</button>
+  <div class="sting" id="sting"><i></i><b>Replay</b></div>
 
   <div class="banner" id="banner"><div class="big" id="bBig"></div><div class="sub" id="bSub"></div><div class="gr" id="bGrade"></div><div class="wh" id="bWhy"></div></div>
 
@@ -549,7 +570,8 @@ function spike(){ if(G.phase!=='call'||G.clk==='stopped'||G.down>=4) return; ui.
 function callPlay(k){ if(G.phase!=='call') return;
   const run=SNAP[G.clk]; if(G.clock-run<=0){ G.clock=0; ui.sheet.classList.remove('open'); hud(); return endGame(['Final','Out of time','The clock ran out before you could get the snap off. Bison win 20-16.']); }
   G.clock-=run; G.phase='live'; ui.sheet.classList.remove('open'); hud(); IDS.forEach(id=>{ const p=P[id]; if(Math.hypot(p.x-form[id][0],p.z-form[id][1])>1.5){ p.x=form[id][0]; p.z=form[id][1]; } });
-  const o=resolve(k); live=buildPlay(k,o); live.key=k; tPlay=-.75; G.plays++; }
+  const o=resolve(k); live=buildPlay(k,o); live.key=k; tPlay=-.75; G.plays++;
+  live.x0=G.ballOn-50; live.fdx=Math.min(50,live.x0+G.toGo); live.goal=G.ballOn+G.toGo>=100; live.down=G.down; live.toGo=G.toGo; lastPlay=live; }
 ui.toBtn.addEventListener('click',callTimeout); ui.spikeBtn.addEventListener('click',spike);
 ui.oobBtn.addEventListener('click',()=>{ if(G.phase!=='call') return; G.oob=!G.oob; controls(); });
 function finishPlay(){ const o=live.o, dis=G.def!==G.shown; let big,sub='',bad=false, used=6;
@@ -581,8 +603,8 @@ $('startBtn').addEventListener('click',reset); $('againBtn').addEventListener('c
 const focus=new T.Vector3(-25,0,0), v=new T.Vector3(), from=new T.Vector3(), prev=new T.Vector3(), dirv=new T.Vector3();
 let W=0,H=0,sheetAmt=0,flySeg=null;
 function resize(){ const w=app.clientWidth,h=app.clientHeight; if(!w||!h||(w===W&&h===H)) return; W=w;H=h; const pr=Math.min(window.devicePixelRatio||1,LOW?1.75:2); renderer.setPixelRatio(pr); renderer.setSize(w,h,false); post.resize(Math.round(w*pr),Math.round(h*pr)); }
-function updateBall(t,time){
-  let seg=null; for(const s of live.bseg){ if(t>=s.t0&&t<s.t1){ seg=s; break; } } if(!seg) seg=live.bseg[live.bseg.length-1];
+function updateBall(t,time,L){ L=L||live;
+  let seg=null; for(const s of L.bseg){ if(t>=s.t0&&t<s.t1){ seg=s; break; } } if(!seg) seg=L.bseg[L.bseg.length-1];
   prev.copy(ball.position);
   if(seg.held){ const p=P[seg.held]; p.root.updateMatrixWorld(true); p.hand.getWorldPosition(ball.position); ball.rotation.set(.25,p.yaw+.3,0); flySeg=null; }
   else if(seg.rest){ ball.position.set(seg.rest[0],.2,seg.rest[1]); flySeg=null; }
@@ -594,7 +616,8 @@ function updateBall(t,time){
 }
 function step(dt){
   simTime+=dt; phaseT+=dt; const time=simTime;
-  if(G.phase==='live'){
+  if(G.phase==='replay') stepReplay(dt);
+  else if(G.phase==='live'){
     tPlay+=dt; const t=tPlay;
     for(const id of IDS){ const a=live.A[id], p=posAt(a.kf,t); place(P[id],p[0],p[1],time,dt,flagsAt(a,t)); }
     updateBall(t,time);
@@ -606,22 +629,86 @@ function step(dt){
       else if(live){ o=flagsAt(live.A[id],live.tEnd+5); delete o.shove; delete o.reach; delete o.pass; }
       place(p,x,z,time,dt,o); }
     if(live&&!idle) updateBall(live.tEnd+5,time); else if(idle){ const c=P.ol1; c.root.updateMatrixWorld(true); c.hand.getWorldPosition(ball.position); ball.rotation.set(0,PI/2,0); }
-    if(G.phase==='result'&&phaseT>(pending?(live&&live.o.td?4:2.6):1.9)){ if(pending) endGame(pending); else { G.phase='cut'; ui.fade.classList.add('on'); ui.banner.classList.remove('on'); setTimeout(()=>{ startDown(true); focus.x=G.ballOn-50; focus.z=0; ui.fade.classList.remove('on'); },240); } }
+    if(G.phase==='result'&&phaseT>1.7&&live&&!live.replayed&&replayWorthy(live)) startReplay(false);
+    else if(G.phase==='result'&&phaseT>(pending?(live&&live.o.td?4:2.6):1.9)){ if(pending) endGame(pending); else { G.phase='cut'; ui.fade.classList.add('on'); ui.banner.classList.remove('on'); setTimeout(()=>{ startDown(true); focus.x=G.ballOn-50; focus.z=0; ui.fade.classList.remove('on'); },240); } }
   }
   for(const f of ticks) f(time,dt);
 }
+/* ================= broadcast camera and replays ================= */
+// The live view copies the main TV camera at a college game: high on the press box side, near midfield, looking across the field.
+// It pans and zooms (changes lens, not position) to keep the ball and the players around it in shot, so the offense always drives left to right.
+// Replays rewind the stored play and show it again in slow motion from behind the offense (the end zone camera).
+const CAMZ=HW+36, camPos=new T.Vector3(), pj=new T.Vector3(), kp=[];
+const rpUI={bug:$('rpBug'),angle:$('rpAngle'),skip:$('rpSkip'),btn:$('rpBtn'),sting:$('sting')};
+let lastPlay=null, rp=null, camTan=0, camSnap=true, camPhase='';
+function framePoints(a){   // the spots on the field the broadcast camera keeps in shot right now
+  kp.length=0; const bx=ball.position.x, bz=ball.position.z; let lo,hi,extra=null;
+  if(G.phase==='call'||G.phase==='intro'||G.phase==='cut'||!live||tPlay<0){ const x0=G.ballOn-50; lo=x0-lerp(5,7,a); hi=x0+lerp(7,17,a); kp.push([x0-lerp(4,7,a),0],[x0+lerp(6,12,a),0]); }
+  else if(G.phase!=='live'||tPlay>live.tEnd){ const w=lerp(5,10,a); lo=bx-w; hi=bx+w; kp.push([bx-w*.8,bz],[bx+w*.8,bz]); }
+  else { lo=bx-lerp(5,12,a); hi=bx+lerp(7,20,a); kp.push([bx-lerp(4,6,a),bz],[bx+lerp(5,8,a),bz]);
+    const seg=live.bseg.find(s=>tPlay>=s.t0&&tPlay<s.t1);   // ball in the air: widen to show where it is going, like a broadcast zooming out on a deep throw
+    if(seg&&seg.fly){ const p=P[seg.fly]; extra=[p.x,p.z]; } else if(seg&&seg.ground) extra=seg.ground;
+    if(extra) extra=[Math.min(extra[0],bx+lerp(9,30,a)),extra[1]]; }   // a tall phone screen pans with the ball instead of zooming out as far
+  for(const id of IDS){ const p=P[id]; if(p.x>=lo&&p.x<=hi) kp.push([p.x,p.z]); }
+  if(extra) kp.push(extra); kp.push([bx,bz]);
+}
+function broadcastCam(dt,a,snap,top,bot,xr,c){
+  framePoints(a);
+  let x1=1e9,x2=-1e9,z1=1e9,z2=-1e9; for(const q of kp){ x1=Math.min(x1,q[0]); x2=Math.max(x2,q[0]); z1=Math.min(z1,q[1]); z2=Math.max(z2,q[1]); }
+  const k=snap?1:Math.min(1,dt*3);
+  focus.x+=(lerp((x1+x2)/2,ball.position.x,.3)-focus.x)*k; focus.z+=(clamp((z1+z2)/2,-18,18)-focus.z)*k; focus.y=0;
+  camPos.set(focus.x*.7,lerp(46,30,a),CAMZ);   // trucks a little with the play; sits higher on a tall phone screen so the field fills it
+  if(snap) cam.position.copy(camPos); else cam.position.lerp(camPos,Math.min(1,dt*2.5));
+  if(snap||!camTan) camTan=Math.tan(14*PI/180);
+  for(let it=0;it<(snap?5:1);it++){   // zoom so the farthest key point sits at 90% of the open screen area
+    cam.fov=2*Math.atan(camTan)*180/PI; cam.updateProjectionMatrix(); cam.lookAt(focus); cam.updateMatrixWorld();
+    let r=.05; for(const q of kp) for(const y of [0,2.1]){ pj.set(q[0],y,q[1]).project(cam); const dy=pj.y-c; r=Math.max(r,Math.abs(pj.x)/xr,dy>0?dy/(top-c):-dy/(c-bot)); }
+    const want=clamp(camTan*r/.9,Math.tan(4*PI/180),Math.tan(30*PI/180));
+    camTan+=(want-camTan)*(snap?1:Math.min(1,dt*(want>camTan?3.5:2.4)));
+  }
+  cam.fov=2*Math.atan(camTan)*180/PI; cam.updateProjectionMatrix(); cam.lookAt(focus);
+}
+function replayCam(dt,a,snap){   // end zone camera: behind the offense, following the ball
+  const b=ball.position, k=snap?1:Math.min(1,dt*2.6);
+  focus.x+=(b.x-focus.x)*k; focus.z+=(b.z*.6-focus.z)*k; focus.y=0;
+  camPos.set(focus.x-lerp(19,23,a),lerp(12,9,a),focus.z*.5);
+  if(snap) cam.position.copy(camPos); else cam.position.lerp(camPos,Math.min(1,dt*3));
+  cam.fov=lerp(58,40,a); cam.updateProjectionMatrix(); cam.lookAt(focus.x+lerp(8,10,a),0,focus.z);
+}
+function replayWorthy(L){ const o=L.o; return o.td||o.kind==='int'||o.kind==='sack'||o.yards>=15||(L.down>=3&&o.yards>=L.toGo&&o.kind!=='incomplete'); }
+function sting(){ const s=rpUI.sting; s.classList.remove('go'); void s.offsetWidth; s.classList.add('go'); }
+function startReplay(manual){   // manual: the Replay button during the play call. Otherwise a big play replays itself.
+  const L=lastPlay; if(!L||rp||(manual&&G.phase!=='call')) return;
+  L.replayed=true; G.phase='replay'; rp={L,manual,on:false,clock:0,speed:.5,end:L.tEnd+(L.o.td?1.3:.8)};
+  ui.sheet.classList.remove('open'); ui.banner.classList.remove('on'); sting();
+  setTimeout(()=>{ if(!rp) return; rp.on=true; tPlay=-.5; flySeg=null;
+    for(const id of IDS){ const p=P[id], q=posAt(L.A[id].kf,tPlay); p.x=q[0]; p.z=q[1]; p.j={}; p.yaw=p.team?-PI/2:PI/2; }
+    losLine.position.x=L.x0; fdLine.position.x=L.fdx; fdLine.visible=!L.goal;
+    rpUI.angle.textContent='End zone view · slow motion'; rpUI.bug.hidden=false; rpUI.skip.hidden=false; camSnap=true; },330);
+}
+function stepReplay(dt){ if(!rp||!rp.on) return; const L=rp.L, sd=dt*rp.speed; rp.clock+=sd; tPlay+=sd;
+  for(const id of IDS){ const a=L.A[id], q=posAt(a.kf,tPlay); place(P[id],q[0],q[1],rp.clock,sd,flagsAt(a,tPlay)); }
+  updateBall(tPlay,rp.clock,L); if(tPlay>rp.end) endReplay(); }
+function endReplay(){ if(!rp||rp.ending) return; rp.ending=true; rp.on=false; sting();
+  setTimeout(()=>{ const m=rp.manual; rp=null; rpUI.bug.hidden=true; rpUI.skip.hidden=true;
+    if(m){ G.phase='call'; snapToForm(false); hud(); if(typeof controls==='function') controls(); ui.sheet.classList.add('open'); }
+    else { G.phase='result'; phaseT=99; hud(); if(!pending) ui.fade.classList.add('on'); }
+    camSnap=true; },330); }
+rpUI.btn.addEventListener('click',()=>startReplay(true));
+app.addEventListener('pointerdown',()=>{ if(G.phase==='replay'&&rp&&rp.on&&tPlay>.2) endReplay(); });
 function camera(dt){
-  const a=clamp((W/H-.55)/(1.5-.55),0,1), x0=G.ballOn-50;
-  const liveCam=(G.phase==='live'&&tPlay>.3)||G.phase==='result'||G.phase==='over';
-  const fx=liveCam?ball.position.x:x0, fz=liveCam?ball.position.z*.45:0;
-  focus.x+=(fx-focus.x)*Math.min(1,dt*3.2); focus.z+=(fz-focus.z)*Math.min(1,dt*2.4);
+  const a=clamp((W/H-.55)/(1.5-.55),0,1);
+  if(camPhase!==G.phase&&(camPhase==='cut'||camPhase==='over'||camPhase==='intro')) camSnap=true; camPhase=G.phase;
   const tgtAmt=ui.sheet.classList.contains('open')?1:0; sheetAmt+=(tgtAmt-sheetAmt)*Math.min(1,dt*7);
-  cam.fov=lerp(60,36,a); cam.aspect=W/H;
-  const off=Math.round(sheetAmt*ui.sheet.offsetHeight*.5); if(off>0) cam.setViewOffset(W,H,0,off,W,H); else cam.clearViewOffset();
-  cam.updateProjectionMatrix();
-  const td=live&&live.o.td&&live.carrier&&tPlay>live.tEnd-.2&&G.phase!=='call';
-  if(td){ const c=P[live.carrier]; v.set(c.x-lerp(15,12,a),lerp(7,4.5,a),c.z+lerp(6,8,a)); cam.position.lerp(v,Math.min(1,dt*2)); cam.lookAt(c.x,1.8,c.z); }
-  else { v.set(focus.x-lerp(31,26,a),lerp(23,12.5,a),focus.z*.7); if(G.phase==='cut'||cam.position.lengthSq()<1) cam.position.copy(v); else cam.position.lerp(v,Math.min(1,dt*5)); cam.lookAt(focus.x+lerp(7,10,a),0,focus.z); }
+  // open screen area in NDC: below the scorebug, above the play sheet. The view offset centres the shot in it.
+  const top=1-2*80/H, bot=-1+2*Math.max(16,sheetAmt*ui.sheet.offsetHeight+10)/H, xr=1-2*16/W, c=(top+bot)/2;
+  cam.aspect=W/H; cam.setViewOffset(W,H,0,Math.round(c*H/2),W,H);
+  rpUI.btn.hidden=!(G.phase==='call'&&lastPlay&&G.plays>0);
+  const snap=camSnap||cam.position.lengthSq()<1; camSnap=false;
+  const td=G.phase!=='replay'&&live&&live.o.td&&live.carrier&&tPlay>live.tEnd-.2&&G.phase!=='call';
+  if(G.phase==='replay') replayCam(dt,a,snap);
+  else if(td){ const p=P[live.carrier]; v.set(p.x-5,lerp(4,3,a),p.z+lerp(13,11,a)); cam.position.lerp(v,Math.min(1,dt*2)); cam.fov=lerp(55,38,a); cam.updateProjectionMatrix(); cam.lookAt(p.x,1.4,p.z); }
+  else broadcastCam(dt,a,snap,top,bot,xr,c);
   back.position.set(focus.x-60,50,10); back.target.position.set(focus.x,0,0);
   for(const sp of spots){ const sd=sp.userData.sd; sp.position.set(focus.x-10,44,sd*66); sp.target.position.set(focus.x+6,0,sd*-3); }
 }
@@ -631,6 +718,6 @@ function loop(now){ if(failed) return; const dt=Math.min(.05,(now-last)/1000); l
   requestAnimationFrame(loop); }
 form=formation('man'); snapToForm(false); hud();
 requestAnimationFrame(loop);
-window.__game={G,callPlay,resolve,pickDefense,get live(){return live;},get t(){return tPlay;},tick(sec){ for(let i=0;i<sec*30;i++){ step(1/30); camera(1/30); } }};
+window.__game={G,callPlay,resolve,pickDefense,startReplay,get replay(){return rp;},get cam(){return cam;},get live(){return live;},get t(){return tPlay;},tick(sec){ for(let i=0;i<sec*30;i++){ step(1/30); camera(1/30); } }};
 })();
 </script>
