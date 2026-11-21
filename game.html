@@ -226,6 +226,37 @@ const losLine=tvLine(0x2f8dff), fdLine=tvLine(0xffd21f);
     const gl=new T.Sprite(new T.SpriteMaterial({map:glow,color:new T.Color(1.2,1.25,1.5),transparent:true,blending:T.AdditiveBlending,depthWrite:false,fog:false,opacity:.5})); gl.position.copy(bank.position); gl.scale.set(36,36,1); sc.add(gl); });
 })();
 
+/* ================= locomotion ================= */
+// Nobody teleports. Each frame a player steers toward the spot the play script wants him at,
+// limited by his top speed, an acceleration curve that fades near top speed, how hard he can
+// brake, and how hard he can cut. Yards and seconds. A real top-end sprinter is about 10 yd/s.
+const BODY={ol:{top:6.6,acc:7,brk:10,cut:7},dl:{top:7.3,acc:8,brk:11,cut:8},lb:{top:8.6,acc:9.5,brk:12,cut:10},qb:{top:8.3,acc:9,brk:12,cut:10},
+  rb:{top:9.6,acc:11,brk:13,cut:13},wr:{top:9.9,acc:11,brk:13,cut:12},cb:{top:9.8,acc:11,brk:13,cut:12},s:{top:9.5,acc:10.5,brk:12.5,cut:11}};
+const roleOf=id=>id.replace(/[0-9LR]+$/,'');
+function steer(p,x,z,svx,svz,dt,o){
+  const B=p.phys; let top=o.jog||B.top*(o.burst?1.04:1), brk=B.brk, kp=4.5;
+  if(o.down){ top=Math.min(top,3.5); brk=22; kp=6; }
+  // wanted velocity: the script's own velocity plus a correction for any gap to the scripted spot
+  let wx=svx+(x-p.x)*kp, wz=svz+(z-p.z)*kp; const ws=Math.hypot(wx,wz); if(ws>top){ wx*=top/ws; wz*=top/ws; }
+  const resp=Math.max(.1,dt), sp=Math.hypot(p.vx,p.vz); let ax=(wx-p.vx)/resp, az=(wz-p.vz)/resp, al=0, ap=0;
+  if(sp>.4){ const ux=p.vx/sp, uz=p.vz/sp;
+    al=clamp(ax*ux+az*uz,-brk,B.acc*Math.max(.2,1-sp/(top*1.06))); ap=clamp(-ax*uz+az*ux,-B.cut,B.cut);
+    ax=al*ux-ap*uz; az=al*uz+ap*ux; }
+  else { const a=Math.hypot(ax,az); if(a>B.acc){ ax*=B.acc/a; az*=B.acc/a; } }
+  p.vx+=ax*dt; p.vz+=az*dt; p.x+=p.vx*dt; p.z+=p.vz*dt;
+  const e=Math.min(1,dt*10); p.aF+=(al-p.aF)*e; p.aL+=(ap-p.aL)*e;
+}
+// The script's velocity at time t: a short central difference so corners are rounded, not instant.
+function scriptVel(kf,t){ const h=.06, a=posAt(kf,t-h), b=posAt(kf,t+h); return [(b[0]-a[0])/(2*h),(b[1]-a[1])/(2*h)]; }
+// Turf kicked up by hard plants and full-speed strides.
+const turf=(function(){
+  const tex=canvasTex(64,64,(x)=>{ for(let i=0;i<26;i++){ x.fillStyle=i%3?'rgba(70,150,70,.9)':'rgba(120,90,60,.9)'; x.beginPath(); x.arc(32+(srnd()-.5)*34,32+(srnd()-.5)*34,2+srnd()*4,0,7); x.fill(); } });
+  const pool=[]; for(let i=0;i<(LOW?16:32);i++){ const s=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthWrite:false,opacity:0})); s.visible=false; s.userData={t:9,vx:0,vy:0,vz:0}; sc.add(s); pool.push(s); }
+  let n=0; ticks.push((time,dt)=>{ for(const s of pool){ const u=s.userData; if(!s.visible) continue; u.t+=dt; if(u.t>.5){ s.visible=false; continue; }
+    u.vy-=9*dt; s.position.x+=u.vx*dt; s.position.y=Math.max(.05,s.position.y+u.vy*dt); s.position.z+=u.vz*dt; s.material.opacity=.85*(1-u.t/.5); s.scale.setScalar(.35+u.t*.9); } });
+  return (x,z,vx,vz,amt)=>{ const s=pool[n++%pool.length], u=s.userData; s.visible=true; u.t=0; s.position.set(x,.08,z); u.vx=-vx*.15+(R()-.5)*.8; u.vz=-vz*.15+(R()-.5)*.8; u.vy=1.4+amt*1.2; s.material.rotation=R()*6; };
+})();
+
 /* ================= players ================= */
 const numCache={};
 function numMat(n,fg){ const k=n+fg; if(numCache[k]) return numCache[k];
@@ -271,39 +302,59 @@ function humanoid(k,n){
   return {root,body,upper,legL,legR,armL,armR,hand:armR.hand,j:{},s:{}};
 }
 function pose(p,s){
-  const k=Math.min(1,s.dt*14), ph=s.time*12.5+p.seed, sn=Math.sin(ph), cs=Math.cos(ph);
-  let thL=0,thR=0,knL=.06,knR=.06,aL=.08,aR=.08,eL=-.3,eR=-.3,lean=.03,y=0,by=null;
-  if(s.moving){ const m=clamp(s.speed/7,.35,1); thL=-sn*.95*m; thR=sn*.95*m; knL=.25+Math.max(0,cs)*1.25*m; knR=.25+Math.max(0,-cs)*1.25*m; aL=sn*.9*m; aR=-sn*.9*m; eL=eR=-1.35; lean=.12+.2*m; y=Math.abs(cs)*.08*m; }
-  if(s.ready){ aL=aR=-.75; eL=eR=-1.25; knL=knR=.25; thL=thR=-.12; }
-  if(s.stance){ lean=.95; thL=-1.15; thR=-.9; knL=1.5; knR=1.35; aR=-.95; eR=0; aL=-.5; eL=-1.2; }
-  if(s.shove){ lean=.5; thL=-.75+sn*.22; thR=.3-sn*.22; knL=.85; knR=.5; aL=aR=-1.45+.15*sn; eL=eR=-.4; }
+  const k=Math.min(1,s.dt*14), B=p.phys, sp=s.speed;
+  // Gait comes from ground covered, not the clock, so cleats do not skate.
+  // Walk under ~2 yd/s, then the stride lengthens and the knees drive higher toward a full sprint.
+  const back=sp>.6&&s.fwd<-.35*sp, r=clamp((sp-1.8)/(B.top-1.8),0,1), g=clamp((sp-.25)/.8,0,1);
+  const cyc=back?1.1:sp<2?1.5:1.7+.26*sp;
+  p.ph+=(back?-1:1)*2*PI*sp/cyc*s.dt;
+  const sn=Math.sin(p.ph), cs=Math.cos(p.ph), chop=Math.sin(s.time*10+p.seed);
+  let thL=0,thR=0,knL=.06,knR=.06,aL=.08,aR=.08,eL=-.3,eR=-.3,lean=.03,y=0,by=null,roll=0;
+  if(g>0){
+    if(back){ // backpedal: short choppy steps, sitting low, chest over the toes
+      thL=-.35-sn*.42; thR=-.35+sn*.42; knL=.6+Math.max(0,-cs)*.65; knR=.6+Math.max(0,cs)*.65; aL=sn*.35; aR=-sn*.35; eL=eR=-1.15; lean=.24; y=-.06+Math.abs(cs)*.025;
+    } else {
+      const fr=lerp(.42,1.22,r), bk=lerp(.34,.62,r), th=v=>v>0?-v*fr:-v*bk;
+      thL=th(sn); thR=th(-sn); knL=lerp(.1,.22,r)+Math.max(0,cs)*lerp(.5,1.65,r); knR=lerp(.1,.22,r)+Math.max(0,-cs)*lerp(.5,1.65,r);
+      aL=sn*lerp(.38,1.15,r); aR=-sn*lerp(.38,1.15,r); eL=eR=lerp(-.5,-1.45,r); lean=lerp(.05,.27,r); y=Math.abs(cs)*lerp(.015,.1,r);
+    }
+    thL*=g; thR*=g; aL*=g; aR*=g;
+    // Speed changes show in the body: chest drives forward to accelerate, sits back to brake, and leans into cuts.
+    lean+=clamp(s.aF*.034,-.24,.46)*g; roll=clamp(s.aL*.03,-.4,.4)*g;
+    const plant=clamp(Math.abs(s.aL)/B.cut,0,1)*g; knL+=.3*plant; knR+=.3*plant; y-=.06*plant;
+  }
+  if(s.ready){ aL=aR=-.75; eL=eR=-1.25; if(g<.5){ knL=knR=.25; thL=thR=-.12; } }
+  if(s.stance){ lean=.95; thL=-1.15; thR=-.9; knL=1.5; knR=1.35; aR=-.95; eR=0; aL=-.5; eL=-1.2; roll=0; }
+  if(s.shove){ lean=.5+Math.max(0,s.aF)*.02; thL=-.75+chop*.22; thR=.3-chop*.22; knL=.85; knR=.5; aL=aR=-1.45+.15*chop; eL=eR=-.4; }
   if(s.carry){ aR=-.55; eR=-1.9; }
   if(s.pass>0){ aR=lerp(aR,-2.9,s.pass); eR=lerp(eR,-1.0,s.pass); aL=lerp(aL,-1.2,s.pass); }
   if(s.reach>0){ aL=lerp(aL,-2.3,s.reach); aR=lerp(aR,-2.3,s.reach); eL=lerp(eL,-.3,s.reach); eR=lerp(eR,-.3,s.reach); }
-  if(s.cheer){ aL=-2.85+.2*sn; aR=-2.85-.2*sn; eL=eR=-.25; y=Math.abs(Math.sin(s.time*6.5+p.seed))*.6; thL=thR=-.2; knL=knR=.45; lean=-.08; }
-  if(s.down){ lean=1.4; thL=1.35; thR=1.45; knL=.15; knR=.2; aL=-2.7; aR=-2.5; eL=eR=-.3; by=-.62; }
+  if(s.cheer){ const hop=Math.sin(s.time*6.5+p.seed); aL=-2.85+.2*hop; aR=-2.85-.2*hop; eL=eR=-.25; y=Math.abs(hop)*.6; thL=thR=-.2; knL=knR=.45; lean=-.08; roll=0; }
+  if(s.down){ lean=1.4; thL=1.35; thR=1.45; knL=.15; knR=.2; aL=-2.7; aR=-2.5; eL=eR=-.3; by=-.62; roll=0; }
   const j=p.j, set=(n,v)=>{ j[n]=j[n]===undefined?v:j[n]+(v-j[n])*k; return j[n]; };
   thL=set('thL',thL); thR=set('thR',thR); knL=set('knL',knL); knR=set('knR',knR);
   p.legL.hip.rotation.x=thL; p.legR.hip.rotation.x=thR; p.legL.knee.rotation.x=knL; p.legR.knee.rotation.x=knR;
   p.armL.sh.rotation.x=set('aL',aL); p.armR.sh.rotation.x=set('aR',aR); p.armL.el.rotation.x=set('eL',eL); p.armR.el.rotation.x=set('eR',eR);
-  p.upper.rotation.x=set('lean',lean);
+  p.upper.rotation.x=set('lean',lean); p.body.rotation.z=set('roll',roll);
   const reach=(t,n)=>.45*Math.cos(t)+.55*Math.cos(t+n);
   p.body.position.y=set('by',by!==null?by:Math.max(reach(thL,knL),reach(thR,knR))-1)+set('y',y);
   p.root.rotation.y=s.yaw;
 }
 const OFF=['ol0','ol1','ol2','qb','rb','wrL','wrR'], DEF=['dl0','dl1','dl2','lb','cbL','cbR','s'], IDS=OFF.concat(DEF);
 const NUMS={ol0:62,ol1:55,ol2:71,qb:12,rb:28,wrL:81,wrR:19,dl0:93,dl1:97,dl2:90,lb:52,cbL:21,cbR:24,s:33};
-const P={}; IDS.forEach((id,i)=>{ const team=i<7?0:1, p=humanoid(TEAMS[team],String(NUMS[id])); p.id=id; p.team=team; p.seed=i*1.7; p.x=0; p.z=0; p.yaw=team?-PI/2:PI/2; sc.add(p.root); P[id]=p; });
+const P={}; IDS.forEach((id,i)=>{ const team=i<7?0:1, p=humanoid(TEAMS[team],String(NUMS[id])); p.id=id; p.team=team; p.seed=i*1.7; p.x=0; p.z=0; p.yaw=team?-PI/2:PI/2; p.phys=BODY[roleOf(id)]; p.vx=p.vz=p.aF=p.aL=0; p.ph=p.seed; sc.add(p.root); P[id]=p; });
 const ball=(function(){ const pts=[]; for(let i=0;i<=12;i++){ const t=i/12; pts.push(new T.Vector2(.2*Math.pow(Math.sin(PI*t),.72)+1e-4,(t-.5)*.78)); } const g=new T.LatheGeometry(pts,16); g.rotateX(PI/2);
   const grp=new T.Group(); grp.add(M(g,S(0x7a3b1c,.55))); [-.24,.24].forEach(z=>grp.add(M(new T.TorusGeometry(.165,.022,6,16),S(0xf4f4f0,.6),0,0,z,false))); sc.add(grp); return grp; })();
-function place(p,x,z,time,dt,o){
-  const dx=x-p.x, dz=z-p.z, dist=Math.hypot(dx,dz), speed=dist/Math.max(dt,.001), moving=speed>.6&&dist<3&&!o.down;
-  p.x=x; p.z=z;
-  const yawT=o.face!==undefined?o.face:(moving?Math.atan2(dx,dz):(o.down?p.yaw:(p.team?-PI/2:PI/2)));
-  let dy=yawT-p.yaw; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); p.yaw+=dy*Math.min(1,dt*11);
-  const s=p.s; s.time=time; s.dt=dt; s.moving=moving; s.speed=speed; s.yaw=p.yaw;
+function place(p,x,z,time,dt,o,svx,svz){
+  const px=p.x, pz=p.z; steer(p,x,z,svx||0,svz||0,dt,o);
+  const sp=Math.hypot(p.vx,p.vz), hx=Math.sin(p.yaw), hz=Math.cos(p.yaw);
+  const yawT=o.face!==undefined?o.face:(sp>1&&!o.down?Math.atan2(p.vx,p.vz):(o.down?p.yaw:(sp>.3?Math.atan2(p.vx,p.vz):(p.team?-PI/2:PI/2))));
+  let dy=yawT-p.yaw; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); p.yaw+=dy*Math.min(1,dt*(o.face!==undefined?8:10));
+  const s=p.s; s.time=time; s.dt=dt; s.speed=sp; s.fwd=p.vx*hx+p.vz*hz; s.aF=p.aF; s.aL=p.aL; s.yaw=p.yaw;
   s.stance=!!o.stance; s.shove=!!o.shove; s.ready=!!o.ready; s.carry=!!o.carry; s.cheer=!!o.cheer; s.down=!!o.down; s.pass=o.pass||0; s.reach=o.reach||0;
-  p.root.position.set(x,0,z); pose(p,s);
+  const ph0=p.ph; p.root.position.set(p.x,0,p.z); pose(p,s);
+  // a cleat strike each half stride: kick turf on a hard cut or a full-speed stride
+  if(!o.down&&Math.floor(p.ph/PI)!==Math.floor(ph0/PI)){ const cut=Math.abs(p.aL)/p.phys.cut; if(cut>.7||sp>p.phys.top*.9) turf(p.x-hx*.3,p.z-hz*.3,p.vx,p.vz,Math.min(1.5,cut)); }
 }
 
 /* ================= rules ================= */
@@ -359,7 +410,7 @@ function buildPlay(pk,o){
   const x0=G.ballOn-50, A={}, d=G.def, zone=d==='zone', bseg=[];
   IDS.forEach(id=>A[id]={kf:[[-9,form[id][0],form[id][1]],[0,form[id][0],form[id][1]]],fl:[]});
   const K=(id,t,x,z)=>{ const kf=A[id].kf; while(kf.length>1&&kf[kf.length-1][0]>=t-1e-3) kf.pop(); kf.push([t,x,z]); };
-  const go=(id,t0,t1,x,z)=>{ const p=posAt(A[id].kf,t0); K(id,t0,p[0],p[1]); K(id,Math.max(t1,t0+.05),x,z); };
+  const go=(id,t0,t1,x,z)=>{ const cap=BODY[roleOf(id)].top*.9; let p; for(let i=0;i<3;i++){ p=posAt(A[id].kf,t0); const need=Math.hypot(x-p[0],z-p[1])/cap+.3; if(t1-t0>=need) break; t0=Math.max(0,t1-need); } K(id,t0,p[0],p[1]); K(id,Math.max(t1,t0+.05),x,z); };
   const F=(id,t0,t1,n,v)=>A[id].fl.push([t0,t1,n,v===undefined?1:v]);
   const at=(id,t)=>posAt(A[id].kf,t);
   ['ol0','ol1','ol2','dl0','dl1','dl2'].forEach(id=>F(id,-9,0,'stance'));
@@ -433,14 +484,17 @@ function buildPlay(pk,o){
       }
     }
   }
+  if(carrier&&o.yards>=12) F(carrier,tLive,99,'burst'); // breakaway: second gear
   // finish: tackle or touchdown
   if(carrier){
     if(o.td){ K(carrier,tEnd+.55,Math.max(endX+3,53.5),endZ); F(carrier,tEnd+.6,99,'cheer'); F(carrier,tEnd+.6,99,'face',-PI/2); OFF.forEach(id=>{ if(id!==carrier) F(id,tEnd+.7,99,'cheer'); });
       DEF.forEach((id,i)=>go(id,Math.min(tLive,tEnd-.2),tEnd+.3,Math.min(endX,49)-1.5-i*1.1,endZ+(i-3)*1.6)); tEnd+=.6; }
     else { if(!tackler||tackler===carrier) tackler='lb';
+      const reach=id=>{ const q=at(id,tLive); return Math.hypot(endX-q[0],endZ-q[1])/BODY[roleOf(id)].top-(tEnd-tLive); };
+      if(reach(tackler)>.15) tackler=DEF.filter(id=>id!==carrier).reduce((a,b)=>reach(b)<reach(a)?b:a);
       DEF.forEach((id,i)=>{ if(id===tackler) return; if(/^dl/.test(id)&&o.yards>4) return; go(id,Math.min(tLive,tEnd-.2),tEnd+.25,endX+1.2+((i*37)%5)*.5,endZ+(i-3)*1.3); });
       go(tackler,Math.max(0,Math.min(tLive,tEnd-.5)),tEnd,endX+.55,endZ+.25); A[tackler].fl=A[tackler].fl.filter(f=>f[2]!=='shove'||f[1]<tEnd-.4);
-      F(carrier,tEnd,99,'down'); F(tackler,tEnd,99,'down'); }
+      F(tackler,tEnd-.45,tEnd+.2,'wrap'); F(carrier,tEnd,99,'down'); F(tackler,tEnd,99,'down'); }
   }
   return {A,bseg,tEnd,endX,endZ,o,carrier};
 }
@@ -460,11 +514,11 @@ function showBanner(big,sub,why,bad){ ui.big.textContent=big; ui.big.classList.t
 
 /* ================= game flow ================= */
 let live=null, tPlay=0, phaseT=0, simTime=0, celebrate=null;
-function snapToForm(spread){ IDS.forEach((id,i)=>{ const p=P[id]; p.x=form[id][0]+(spread?(p.team?4:-4)+((i*7)%5-2)*.6:0); p.z=form[id][1]*(spread?.75:1); p.root.position.set(p.x,0,p.z); p.j={}; p.yaw=p.team?-PI/2:PI/2; }); }
+function snapToForm(spread){ IDS.forEach((id,i)=>{ const p=P[id]; p.x=form[id][0]+(spread?(p.team?4:-4)+((i*7)%5-2)*.6:0); p.z=form[id][1]*(spread?.75:1); p.root.position.set(p.x,0,p.z); p.j={}; p.vx=p.vz=p.aF=p.aL=0; p.yaw=p.team?-PI/2:PI/2; }); }
 function startDown(cut){ pickDefense(); form=formation(G.shown); if(cut) snapToForm(true); live=null; celebrate=null; G.phase='call'; phaseT=0; hud();
   ui.look.textContent=LOOKS[G.shown].name; ui.tip.textContent=LOOKS[G.shown].tip; ui.banner.classList.remove('on'); ui.sheet.classList.add('open'); }
-function callPlay(k){ if(G.phase!=='call') return; G.phase='live'; ui.sheet.classList.remove('open'); IDS.forEach(id=>{ const p=P[id]; if(Math.hypot(p.x-form[id][0],p.z-form[id][1])>1.5){ p.x=form[id][0]; p.z=form[id][1]; } });
-  const o=resolve(k); live=buildPlay(k,o); live.key=k; tPlay=-.75; G.plays++; }
+function callPlay(k){ if(G.phase!=='call') return; G.phase='live'; ui.sheet.classList.remove('open'); let far=0; IDS.forEach(id=>{ const p=P[id]; far=Math.max(far,Math.hypot(p.x-form[id][0],p.z-form[id][1])); });
+  const o=resolve(k); live=buildPlay(k,o); live.key=k; tPlay=-Math.max(.75,far/3.6+.45); G.plays++; }
 function finishPlay(){ const o=live.o, dis=G.def!==G.shown; let big,sub='',bad=false, used=16;
   const why='Defense ran '+LOOKS[G.def].name.toLowerCase()+(dis?'. They disguised it.':'.');
   let over=null;
@@ -505,13 +559,15 @@ function step(dt){
   simTime+=dt; phaseT+=dt; const time=simTime;
   if(G.phase==='live'){
     tPlay+=dt; const t=tPlay;
-    for(const id of IDS){ const a=live.A[id], p=posAt(a.kf,t); place(P[id],p[0],p[1],time,dt,flagsAt(a,t)); }
+    for(const id of IDS){ const a=live.A[id], fl=flagsAt(a,t); let p=posAt(a.kf,t), v=scriptVel(a.kf,t+.05);
+      if(fl.wrap&&live.carrier){ const c=P[live.carrier]; p=[c.x+.45,c.z+.2]; v=[c.vx,c.vz]; } // the tackler closes on the runner where he really is
+      place(P[id],p[0],p[1],time,dt,fl,v[0],v[1]); }
     updateBall(t,time);
     if(t>live.tEnd+(live.o.td?.7:1.0)) finishPlay();
   } else {
     const idle=G.phase==='call'||G.phase==='intro';
     for(const id of IDS){ const p=P[id]; let x=p.x,z=p.z,o={};
-      if(idle){ const tx=form[id][0],tz=form[id][1], d=Math.hypot(tx-x,tz-z), stp=Math.min(d,7.5*dt); if(d>.02){ x+=(tx-x)/d*stp; z+=(tz-z)/d*stp; } if(d<.4){ if(/^(ol|dl)/.test(id)) o.stance=true; if(id==='qb') o.ready=true; } }
+      if(idle){ x=form[id][0]; z=form[id][1]; o.jog=4.2; const d=Math.hypot(x-p.x,z-p.z); if(d<.4){ if(/^(ol|dl)/.test(id)) o.stance=true; if(id==='qb') o.ready=true; } }
       else if(live){ o=flagsAt(live.A[id],live.tEnd+5); delete o.shove; delete o.reach; delete o.pass; }
       place(p,x,z,time,dt,o); }
     if(live&&!idle) updateBall(live.tEnd+5,time); else if(idle){ const c=P.ol1; c.root.updateMatrixWorld(true); c.hand.getWorldPosition(ball.position); ball.rotation.set(0,PI/2,0); }
