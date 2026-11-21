@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "game", "runtimeExecutable": "node", "runtimeArgs": ["tools/serve.mjs"], "port": 5173 }
+    { "name": "mockups", "runtimeExecutable": "python", "runtimeArgs": ["-m", "http.server", "5173"], "port": 5173 }
   ]
 }
