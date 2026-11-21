@@ -7,14 +7,14 @@
 :root{
   color-scheme:dark;
   --bg:#04070f; --panel:#0e1524; --panel2:#17203a; --line:#2a3555;
-  --fg:#eef2f8; --muted:#9aa8c2; --gold:#ffd21f; --blue:#2f6bff; --red:#d8323f; --good:#39d98a;
+  --fg:#eef2f8; --muted:#b9c5da; --gold:#ffd21f; --blue:#2f6bff; --red:#d8323f; --good:#39d98a;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;
   --body:"Inter",system-ui,sans-serif;
   --gl:max(12px,env(safe-area-inset-left,0px)); --gr:max(12px,env(safe-area-inset-right,0px));
 }
 [hidden]{display:none!important}
 html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.45;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .app{position:relative;height:100%;overflow:hidden;touch-action:manipulation}
 .app canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .fade{position:absolute;inset:0;background:#04070f;opacity:0;pointer-events:none;transition:opacity .22s}
@@ -28,36 +28,59 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 .bug .tm b{font-size:23px;min-width:1.1em;text-align:right;font-variant-numeric:tabular-nums}
 .bug .ck{color:#b8c4d8;font-weight:600;font-variant-numeric:tabular-nums}
 .bug .ck.low{color:#ff7a7a}
+.bug .to{display:flex;gap:3px;margin-left:2px;align-self:center}
+.bug .to u{width:6px;height:13px;background:var(--gold);border-radius:1px}
+.bug .to u.used{background:#ffffff26}
 .bug .dd{background:var(--gold);color:#111}
-.spot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 50px);left:0;right:0;text-align:center;font-family:var(--display);font-weight:600;letter-spacing:.12em;font-size:13px;color:#cfd8ea;text-shadow:0 1px 3px #000;pointer-events:none}
+.spot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 50px);left:0;right:0;text-align:center;font-family:var(--display);font-weight:600;letter-spacing:.1em;font-size:15px;color:#e3e9f4;text-shadow:0 1px 3px #000,0 0 8px #000;pointer-events:none}
+.spot .cs{color:var(--good)} .spot .cs.run{color:#ffb35c}
 
 /* play-call sheet */
 .sheet{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#0e1524f5,#090e1af8);border-top:1px solid var(--line);transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
 .sheet.open{transform:none}
-.sheet .in{max-width:720px;margin:0 auto;padding-block:10px 0;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:9px}
+.sheet .in{max-width:820px;margin:0 auto;padding-block:10px 0;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:9px}
 .scout{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.scout .lab{font-family:var(--display);font-weight:600;letter-spacing:.12em;font-size:13px;color:var(--muted);text-transform:uppercase}
-.scout .look{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase;background:var(--red);color:#fff;padding:0 8px}
-.scout .tip{color:var(--muted);font-size:13px;min-width:0}
+.scout .lab{font-family:var(--display);font-weight:600;letter-spacing:.12em;font-size:15px;color:var(--muted);text-transform:uppercase}
+.scout .look{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.04em;text-transform:uppercase;background:var(--red);color:#fff;padding:0 8px}
+.scout .tip{color:#dbe2ee;font-size:16px;min-width:0}
+.read{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:40px}
+.read .lab{font-family:var(--display);font-weight:600;letter-spacing:.12em;font-size:15px;color:var(--muted);text-transform:uppercase}
+.read .tell{font-size:16px;color:#fff;font-weight:500}
+.read .free{font-size:14px;color:var(--good)}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.05em;text-transform:uppercase;padding:6px 12px;border-radius:5px;cursor:pointer;min-height:40px}
+.chip small{font-family:var(--body);font-weight:500;font-size:14px;letter-spacing:0;text-transform:none;color:var(--muted);margin-left:4px}
+.chip:active{border-color:var(--gold)}
+.chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.chip:disabled{opacity:.4;cursor:default}
+.chip[aria-pressed="true"]{background:var(--gold);color:#111;border-color:var(--gold)}
+.chip[aria-pressed="true"] small{color:#3a3000}
+.chip.read-btn{border-color:#5fb0ff;color:#cfe6ff}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.card{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:6px;padding:7px 8px 8px;display:flex;flex-direction:column;gap:3px;text-align:left;font:inherit;cursor:pointer;min-width:0}
+.card{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:6px;padding:8px 9px 10px;display:flex;flex-direction:column;gap:4px;text-align:left;font:inherit;cursor:pointer;min-width:0}
 .card:active{background:#22305a;border-color:var(--gold)}
 .card:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .card svg{width:100%;height:auto;aspect-ratio:64/40;background:#1c6a2d;border-radius:3px}
-.card .nm{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em}
-.card .tg{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.card .nm{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em}
+.card .tg{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 .card .tg.run{color:#7fd6ff}
-.card .nt{font-size:12px;color:var(--muted);line-height:1.25}
+.card .nt{font-size:15px;color:#cdd6e6;line-height:1.3}
+.card .ib{display:none;font-size:13px;color:#ffb35c}
+.oob-on .card.inside .ib{display:block}
 @media (min-width:760px){.cards{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media (max-height:520px){.card svg{display:none}}
+@media (max-width:440px){.card .nm{font-size:19px}.card .nt{font-size:14px}.card{padding:6px 7px 8px}.cards{gap:6px}.sheet .in{gap:7px}.chip{font-size:16px;padding:4px 9px;min-height:38px}.chip small:not(#toLeft):not(.keep){display:none}.scout .tip{font-size:15px}.read .tell{font-size:15px}.read .free{display:none}
+  .bug .in{font-size:16px}.bug .tm b{font-size:20px}.bug .in>*{padding:4px 6px;gap:4px}.bug .to u{width:5px;height:11px}.spot{font-size:13px}}
 
 /* banners and overlays */
 .banner{position:absolute;left:0;right:0;top:34%;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;padding-left:var(--gl);padding-right:var(--gr);text-align:center}
 .banner.on{opacity:1;transform:none}
 .banner .big{font-family:var(--display);font-weight:700;font-size:clamp(40px,12vw,76px);line-height:.95;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,transparent,#0b101ce6 14%,#0b101ce6 86%,transparent);padding:2px 44px;border-block:2px solid var(--gold)}
 .banner .big.bad{border-color:var(--red)}
-.banner .sub{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 4px #000}
-.banner .wh{font-size:13px;color:#dfe6f3;text-shadow:0 1px 4px #000;background:#0b101cb0;padding:2px 10px;border-radius:3px}
+.banner .sub{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 4px #000}
+.banner .wh{font-size:17px;line-height:1.4;color:#eef2f8;text-shadow:0 1px 4px #000;background:#0b101cd9;padding:6px 14px;border-radius:4px;max-width:min(560px,94vw)}
+.banner .gr{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;padding:1px 10px;border-radius:3px;margin-top:4px}
+.banner .gr.good{background:var(--good);color:#06210f} .banner .gr.ok{background:#e3e9f4;color:#111} .banner .gr.bad{background:var(--red);color:#fff}
 .over{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at center,#04070fb8,#04070fe8);padding:20px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
 .over .box{max-width:400px;width:100%;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .over .eye{font-family:var(--display);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-size:14px}
@@ -73,17 +96,23 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 <div class="app" id="app">
   <div class="fade" id="fade"></div>
   <div class="bug"><div class="in">
-    <span class="tm" style="--tc:#2f55d6"><i></i>COM <b id="sUs">16</b></span>
+    <span class="tm" style="--tc:#2f55d6"><i></i>COM <b id="sUs">16</b><em class="to" id="toUs" aria-label="Timeouts left"><u></u><u></u><u></u></em></span>
     <span class="tm" style="--tc:#d8323f"><i></i>BIS <b id="sThem">20</b></span>
     <span class="ck" id="clock">4TH 2:30</span>
     <span class="dd" id="dd">1ST &amp; 10</span>
   </div></div>
   <div class="spot" id="spot">BALL ON OWN 25</div>
 
-  <div class="banner" id="banner"><div class="big" id="bBig"></div><div class="sub" id="bSub"></div><div class="wh" id="bWhy"></div></div>
+  <div class="banner" id="banner"><div class="big" id="bBig"></div><div class="sub" id="bSub"></div><div class="gr" id="bGrade"></div><div class="wh" id="bWhy"></div></div>
 
   <div class="sheet" id="sheet"><div class="in">
     <div class="scout"><span class="lab">Defense shows</span><span class="look" id="look">Blitz</span><span class="tip" id="tip"></span></div>
+    <div class="read" id="read"></div>
+    <div class="ctl">
+      <button class="chip" id="toBtn" type="button">Timeout <small id="toLeft">3 left</small></button>
+      <button class="chip" id="spikeBtn" type="button">Spike <small>costs a down</small></button>
+      <button class="chip" id="oobBtn" type="button" aria-pressed="false">Get out of bounds <small>shorter gain</small></button>
+    </div>
     <div class="cards" id="cards"></div>
   </div></div>
 
@@ -92,9 +121,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
     <h1>One drive to win it</h1>
     <p>You coach the Comets, down 20&ndash;16. The ball is on your own 25. Score a touchdown before the clock runs out.</p>
     <ul>
-      <li>Read the defense, then tap a play.</li>
-      <li>Four downs to gain ten yards. A field goal is not enough.</li>
-      <li>The look they show is right about three times in four.</li>
+      <li>The defense will disguise its look. Take a pre-snap read to see through it. It is free when the clock is stopped, and costs 10 seconds when it is running.</li>
+      <li>Three timeouts, a spike, and the sideline are yours to manage the clock. Inside 2:00, first downs and out-of-bounds stop it.</li>
+      <li>A field goal is not enough. You need six.</li>
     </ul>
     <button class="btn" id="startBtn" type="button">Start the drive</button>
   </div></div>
@@ -316,6 +345,18 @@ const PLAYS={
   post:{name:'Deep Post',tag:'Pass',note:'Huge gain. Risky.',d:'M56 28 L56 13 L38 2'}
 };
 const LOOKS={box:{name:'Stacked box',tip:'Loaded up to stop the run.'},blitz:{name:'Blitz',tip:'Extra rushers are coming.'},man:{name:'Man press',tip:'Tight on your receivers.'},zone:{name:'Deep zone',tip:'Dropping back to guard the deep ball.'}};
+// pre-snap read: what the defense actually does gives itself away, most of the time
+const TELLS={box:'The safety is walking down into the box.',blitz:'The linebacker is creeping up to the line, ready to rush.',man:'Corners are pressed up, nose to nose with your receivers.',zone:'Both safeties are backing up deep.'};
+const TELL_ACC=.9, READ_COST=10;
+// why a play works or fails against each defense, in football terms
+const MATCH={
+  dive:{box:'Eight in the box clogs the middle.',blitz:'Blitzers fly upfield, so a quick hit inside can slip past them.',man:'With defenders chasing receivers, the middle is light.',zone:'The safeties sit deep, so there is room up the gut.'},
+  sweep:{box:'A stacked box seals the edge fast.',blitz:'An edge blitz usually blows up the pitch before the back gets outside.',man:'Corners turn and run with receivers, leaving the edge soft.',zone:'Deep safeties give the back room to turn the corner.'},
+  slants:{box:'Linebackers creep up, which opens the window behind them.',blitz:'The ball comes out before the rush gets home.',man:'Press corners jam the release and sit on short routes.',zone:'Zone defenders sit in the short windows, so slants gain very little.'},
+  screen:{box:'Too many bodies near the line to set up the screen.',blitz:'Rushers run right past the back, and the screen floats over their heads.',man:'A linebacker in man stays glued to the back.',zone:'Underneath defenders are far away, so there is room to run.'},
+  pa:{box:'The run fake freezes a stacked box and the crosser gets behind it.',blitz:'Blitzers ignore the fake and get to the quarterback fast.',man:'The fake buys a step against man coverage.',zone:'Zone defenders keep their eyes on the quarterback and squeeze the crosser.'},
+  post:{box:'Only one deep safety, so the post is one on one.',blitz:'The blitz leaves the deep middle open, if the line holds up.',man:'One on one deep. A coin flip with a big payoff.',zone:'Two deep safeties sit right on top of the post.'}};
+const OOB_BASE={dive:0,sweep:.35,slants:0,screen:.25,pa:.2,post:.3}, OOB_WANT=.85;
 // run: [mean yards, spread, breakaway chance]   pass: [completion, mean yards, spread, sack, interception]
 const RUN={dive:{box:[.5,2,.02],blitz:[3.5,4,.08],man:[4.2,2.5,.04],zone:[5.8,2,.03]},sweep:{box:[0,3,.03],blitz:[2,5,.1],man:[4.2,4,.06],zone:[6.2,3,.08]}};
 const PASS={slants:{box:[.76,7,3,.02,.01],blitz:[.82,10,5,.04,.01],man:[.55,6,3,.03,.03],zone:[.74,6,2,.02,.015]},
@@ -323,7 +364,11 @@ const PASS={slants:{box:[.76,7,3,.02,.01],blitz:[.82,10,5,.04,.01],man:[.55,6,3,
   pa:{box:[.74,17,5,.06,.02],blitz:[.45,11,4,.22,.03],man:[.58,12,4,.07,.03],zone:[.58,11,4,.06,.03]},
   post:{box:[.5,30,7,.08,.04],blitz:[.38,30,8,.28,.05],man:[.42,29,7,.08,.05],zone:[.16,26,6,.06,.13]}};
 const MINY={slants:1,screen:-3,pa:6,post:15};
-const G={phase:'intro',ballOn:25,down:1,toGo:10,clock:150,us:16,them:20,def:'man',shown:'man',plays:0};
+const G={phase:'intro',ballOn:25,down:1,toGo:10,clock:150,us:16,them:20,def:'man',shown:'man',tell:'man',read:false,clk:'stopped',timeouts:3,oob:false,plays:0};
+// grade each call against what the defense really ran: top two plays are good calls, bottom two are tough matchups
+const EV={}; ['box','blitz','man','zone'].forEach(d=>{ EV[d]={}; Object.keys(PLAYS).forEach(k=>{ let e;
+  if(RUN[k]){ const t=RUN[k][d]; e=t[0]+t[2]*24; } else { const t=PASS[k][d]; e=(1-t[3])*t[0]*t[1]-t[3]*7-t[4]*25; } EV[d][k]=e; }); });
+function grade(pk,d){ const r=Object.keys(EV[d]).sort((a,b)=>EV[d][b]-EV[d][a]).indexOf(pk); return r<2?['good','Good call']:r>3?['bad','Tough matchup']:['ok','Solid call']; }
 function resolve(pk){
   const d=G.def, room=100-G.ballOn; let o;
   if(RUN[pk]){ const t=RUN[pk][d]; let y=Math.round(t[0]+gauss()*t[1]); if(R()<t[2]) y+=12+Math.round(R()*24); o={kind:'run',yards:Math.max(-4,y)}; }
@@ -334,6 +379,10 @@ function resolve(pk){
     else o={kind:'incomplete',yards:0}; }
   if(o.yards>=room){ o.yards=room; o.td=true; }
   if(G.ballOn+o.yards<1) o.yards=1-G.ballOn;
+  // gains on outside plays can end at the sideline; asking for it costs a couple of yards
+  if(!o.td&&(o.kind==='run'||o.kind==='complete')&&o.yards>0&&OOB_BASE[pk]>0){
+    if(G.oob&&R()<OOB_WANT){ o.oob=true; o.yards=Math.max(1,o.yards-2); }
+    else if(!G.oob&&R()<OOB_BASE[pk]) o.oob=true; }
   return o;
 }
 function pickDefense(){
@@ -343,15 +392,18 @@ function pickDefense(){
   if(G.ballOn>=88){ w.zone=2; w.man+=15; }
   if(G.clock<50){ w.zone+=20; w.box=Math.max(4,w.box-15); }
   const keys=Object.keys(w); let tot=keys.reduce((a,k)=>a+w[k],0), r=R()*tot; G.def=keys[0]; for(const k of keys){ if((r-=w[k])<0){ G.def=k; break; } }
-  G.shown=G.def; if(R()>.72){ const others=keys.filter(k=>k!==G.def); G.shown=others[(R()*others.length)|0]; }
+  G.shown=G.def; if(R()<.4){ const others=keys.filter(k=>k!==G.def); G.shown=others[(R()*others.length)|0]; }
+  G.tell=G.def; if(R()>TELL_ACC){ const others=keys.filter(k=>k!==G.def); G.tell=others[(R()*others.length)|0]; }
 }
 
 /* ================= formations and play scripts ================= */
 const OFFSET={ol0:[-.7,-1.9],ol1:[-.7,0],ol2:[-.7,1.9],qb:[-5,0],rb:[-5,2.3],wrL:[-.7,-9.5],wrR:[-.7,9.5]};
-function formation(look){ const x0=G.ballOn-50, f={};
+function formation(look,tell){ const x0=G.ballOn-50, f={};
   OFF.forEach(id=>f[id]=[x0+OFFSET[id][0],OFFSET[id][1]]);
   const cb={box:5,blitz:1.8,man:1.8,zone:8}[look], lb={box:[3,-1],blitz:[1.6,-3.6],man:[4.5,0],zone:[6,0]}[look], sf={box:[4,3],blitz:[8,1],man:[12,0],zone:[17,0]}[look];
   f.dl0=[x0+1,-1.9]; f.dl1=[x0+1,0]; f.dl2=[x0+1,1.9]; f.lb=[x0+lb[0],lb[1]]; f.cbL=[x0+cb,-9.5]; f.cbR=[x0+cb,9.5]; f.s=[x0+sf[0],sf[1]];
+  // once you read the defense, the defender who gives it away shifts to match the tell
+  if(tell&&tell!==look){ if(tell==='box') f.s=[x0+4,3]; if(tell==='blitz') f.lb=[x0+1.6,-3.6]; if(tell==='man'){ f.cbL[0]=f.cbR[0]=x0+1.8; } if(tell==='zone') f.s=[x0+17,0]; }
   DEF.forEach(id=>{ f[id][0]=Math.min(f[id][0],58); }); return f; }
 let form=formation('man');
 function posAt(kf,t){ if(t<=kf[0][0]) return [kf[0][1],kf[0][2]]; for(let i=1;i<kf.length;i++){ if(t<=kf[i][0]){ const a=kf[i-1], b=kf[i], k=(t-a[0])/Math.max(1e-4,b[0]-a[0]); return [lerp(a[1],b[1],k),lerp(a[2],b[2],k)]; } } const l=kf[kf.length-1]; return [l[1],l[2]]; }
@@ -433,6 +485,11 @@ function buildPlay(pk,o){
       }
     }
   }
+  // out of bounds: the carrier finishes at the sideline instead of being tackled
+  if(carrier&&o.oob&&!o.td){ const kf=A[carrier].kf, l=kf[kf.length-1], sg=endZ>=0?1:-1, nz=sg*27.2, pz=l[2];
+    kf.pop(); const tPrev=kf[kf.length-1][0]; endZ=nz; tEnd=Math.max(tEnd,tPrev+Math.hypot(endX-kf[kf.length-1][1],nz-kf[kf.length-1][2])/8); K(carrier,tEnd,endX,endZ);
+    DEF.forEach((id,i)=>{ if(/^dl/.test(id)) return; go(id,Math.min(tLive,tEnd-.3),tEnd+.2,endX+1+((i*37)%5)*.5,sg*(25.4-((i*13)%4))); });
+    carrier=null; }
   // finish: tackle or touchdown
   if(carrier){
     if(o.td){ K(carrier,tEnd+.55,Math.max(endX+3,53.5),endZ); F(carrier,tEnd+.6,99,'cheer'); F(carrier,tEnd+.6,99,'face',-PI/2); OFF.forEach(id=>{ if(id!==carrier) F(id,tEnd+.7,99,'cheer'); });
@@ -447,43 +504,77 @@ function buildPlay(pk,o){
 function flagsAt(a,t){ const o={}; for(const f of a.fl){ if(t>=f[0]&&t<f[1]){ if(f[2]==='pass') o.pass=clamp(1-Math.abs(t-f[3])/.18,0,1); else if(f[2]==='reach') o.reach=clamp((t-f[0])/.25,0,1); else if(f[2]==='face') o.face=f[3]; else o[f[2]]=true; } } return o; }
 
 /* ================= UI ================= */
-const ui={sheet:$('sheet'),cards:$('cards'),look:$('look'),tip:$('tip'),banner:$('banner'),big:$('bBig'),sub:$('bSub'),why:$('bWhy'),fade:$('fade'),clock:$('clock'),dd:$('dd'),spot:$('spot'),sUs:$('sUs'),sThem:$('sThem')};
+const ui={read:$('read'),toBtn:$('toBtn'),toLeft:$('toLeft'),spikeBtn:$('spikeBtn'),oobBtn:$('oobBtn'),toUs:$('toUs'),grade:$('bGrade'),sheet:$('sheet'),cards:$('cards'),look:$('look'),tip:$('tip'),banner:$('banner'),big:$('bBig'),sub:$('bSub'),why:$('bWhy'),fade:$('fade'),clock:$('clock'),dd:$('dd'),spot:$('spot'),sUs:$('sUs'),sThem:$('sThem')};
 Object.keys(PLAYS).forEach(k=>{ const p=PLAYS[k], b=document.createElement('button'); b.type='button'; b.className='card'; b.id='play-'+k;
-  b.innerHTML='<svg viewBox="0 0 64 40" aria-hidden="true"><line x1="0" y1="28" x2="64" y2="28" stroke="#fff" stroke-opacity=".5" stroke-width="1"/><g fill="#dfe6f3"><circle cx="26" cy="29.5" r="1.6"/><circle cx="32" cy="29.5" r="1.6"/><circle cx="38" cy="29.5" r="1.6"/><circle cx="8" cy="29.5" r="1.6"/><circle cx="56" cy="29.5" r="1.6"/><circle cx="32" cy="36" r="1.6"/><circle cx="36" cy="37" r="1.6"/></g><path d="'+p.d+'" fill="none" stroke="#ffd21f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tg'+(p.tag==='Run'?' run':'')+'">'+p.tag+'</span><span class="nm">'+p.name+'</span><span class="nt">'+p.note+'</span>';
+  b.innerHTML='<svg viewBox="0 0 64 40" aria-hidden="true"><line x1="0" y1="28" x2="64" y2="28" stroke="#fff" stroke-opacity=".5" stroke-width="1"/><g fill="#dfe6f3"><circle cx="26" cy="29.5" r="2"/><circle cx="32" cy="29.5" r="2"/><circle cx="38" cy="29.5" r="2"/><circle cx="8" cy="29.5" r="2"/><circle cx="56" cy="29.5" r="2"/><circle cx="32" cy="36" r="2"/><circle cx="36" cy="37" r="2"/></g><path d="'+p.d+'" fill="none" stroke="#ffd21f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tg'+(p.tag==='Run'?' run':'')+'">'+p.tag+'</span><span class="nm">'+p.name+'</span><span class="nt">'+p.note+'</span>'+(OOB_BASE[k]?'':'<span class="ib">Stays in bounds</span>'); if(!OOB_BASE[k]) b.classList.add('inside');
   b.addEventListener('click',()=>callPlay(k)); ui.cards.appendChild(b); });
 const ORD=['1ST','2ND','3RD','4TH'];
 function hud(){ const m=Math.max(0,Math.ceil(G.clock)); ui.clock.textContent='4TH '+((m/60)|0)+':'+String(m%60).padStart(2,'0'); ui.clock.classList.toggle('low',m<=40);
   const goal=G.ballOn+G.toGo>=100, td=G.ballOn>=100; ui.dd.textContent=td?'TOUCHDOWN':ORD[Math.min(3,G.down-1)]+' & '+(goal?'GOAL':G.toGo);
   ui.spot.textContent=td?'COMETS LEAD':'BALL ON '+(G.ballOn===50?'MIDFIELD':G.ballOn<50?'OWN '+G.ballOn:'BISON '+(100-G.ballOn)); ui.sUs.textContent=G.us; ui.sThem.textContent=G.them;
+  if(!td&&G.phase!=='intro'){ const cs=document.createElement('span'); cs.className='cs'+(G.clk==='stopped'?'':' run'); cs.textContent=G.clk==='stopped'?'  ·  CLOCK STOPPED':'  ·  CLOCK RUNNING'; ui.spot.appendChild(cs); }
+  [...ui.toUs.children].forEach((u,i)=>u.classList.toggle('used',i>=G.timeouts));
   const x0=G.ballOn-50; losLine.position.x=x0; fdLine.position.x=Math.min(50,x0+G.toGo); fdLine.visible=!goal; }
-function showBanner(big,sub,why,bad){ ui.big.textContent=big; ui.big.classList.toggle('bad',!!bad); ui.sub.textContent=sub||''; ui.sub.hidden=!sub; ui.why.textContent=why||''; ui.why.hidden=!why; ui.banner.classList.add('on'); }
+function showBanner(big,sub,why,bad,gr){ ui.grade.hidden=!gr; if(gr){ ui.grade.className='gr '+gr[0]; ui.grade.textContent=gr[1]; } ui.big.textContent=big; ui.big.classList.toggle('bad',!!bad); ui.sub.textContent=sub||''; ui.sub.hidden=!sub; ui.why.textContent=why||''; ui.why.hidden=!why; ui.banner.classList.add('on'); }
 
 /* ================= game flow ================= */
 let live=null, tPlay=0, phaseT=0, simTime=0, celebrate=null;
 function snapToForm(spread){ IDS.forEach((id,i)=>{ const p=P[id]; p.x=form[id][0]+(spread?(p.team?4:-4)+((i*7)%5-2)*.6:0); p.z=form[id][1]*(spread?.75:1); p.root.position.set(p.x,0,p.z); p.j={}; p.yaw=p.team?-PI/2:PI/2; }); }
-function startDown(cut){ pickDefense(); form=formation(G.shown); if(cut) snapToForm(true); live=null; celebrate=null; G.phase='call'; phaseT=0; hud();
+function startDown(cut){ pickDefense(); G.read=false; G.oob=false; form=formation(G.shown); if(cut) snapToForm(true); live=null; celebrate=null; G.phase='call'; phaseT=0;
+  if(G.clk==='stopped') readDefense(true);
+  hud(); controls();
   ui.look.textContent=LOOKS[G.shown].name; ui.tip.textContent=LOOKS[G.shown].tip; ui.banner.classList.remove('on'); ui.sheet.classList.add('open'); }
-function callPlay(k){ if(G.phase!=='call') return; G.phase='live'; ui.sheet.classList.remove('open'); IDS.forEach(id=>{ const p=P[id]; if(Math.hypot(p.x-form[id][0],p.z-form[id][1])>1.5){ p.x=form[id][0]; p.z=form[id][1]; } });
+// the clock between plays: running costs a hurry-up snap, a first down inside 2:00 restarts on the ready signal, stopped costs nothing
+const SNAP={running:12,restart:5,stopped:0};
+function controls(){
+  const call=G.phase==='call';
+  ui.read.innerHTML='';
+  if(G.read){ ui.read.innerHTML='<span class="lab">Pre-snap read</span><span class="tell"></span>'; ui.read.lastChild.textContent=TELLS[G.tell]; }
+  else { const b=document.createElement('button'); b.type='button'; b.className='chip read-btn'; b.innerHTML='Read the defense <small class="keep">costs '+READ_COST+' sec</small>'; b.disabled=!call||G.clock<=READ_COST; b.addEventListener('click',()=>readDefense(false)); ui.read.appendChild(b);
+    const n=document.createElement('span'); n.className='free'; n.textContent='Free when the clock is stopped'; ui.read.appendChild(n); }
+  ui.toLeft.textContent=G.timeouts+' left'; ui.toBtn.disabled=!call||!G.timeouts||G.clk==='stopped';
+  ui.spikeBtn.disabled=!call||G.clk==='stopped'||G.down>=4;
+  ui.oobBtn.setAttribute('aria-pressed',G.oob?'true':'false'); ui.oobBtn.disabled=!call; ui.cards.classList.toggle('oob-on',G.oob);
+}
+function readDefense(free){ if(G.read||(G.phase!=='call'&&!free)) return;
+  if(!free&&G.clk!=='stopped'){ G.clock=Math.max(0,G.clock-READ_COST); }
+  G.read=true; form=formation(G.shown,G.tell); hud(); controls(); }
+function callTimeout(){ if(G.phase!=='call'||!G.timeouts||G.clk==='stopped') return; G.timeouts--; G.clk='stopped';
+  showBanner('Timeout','Comets, '+G.timeouts+' left','The clock is stopped. Your read is free.',false); readDefense(true); hud(); controls();
+  setTimeout(()=>{ if(G.phase==='call') ui.banner.classList.remove('on'); },1600); }
+function spike(){ if(G.phase!=='call'||G.clk==='stopped'||G.down>=4) return; ui.sheet.classList.remove('open'); live=null;
+  G.clock=Math.max(0,G.clock-(G.clk==='running'?4:2)); G.down++; G.clk='stopped'; G.plays++;
+  if(G.clock<=0){ G.clock=0; hud(); return endGame(['Final','Out of time','The clock hit zero before the spike. Bison win 20-16.']); }
+  showBanner('Spiked','Clock stopped at '+fmt(G.clock),ORD[G.down-1]+' & '+G.toGo+' coming up.',false); hud(); next(null); }
+function callPlay(k){ if(G.phase!=='call') return;
+  const run=SNAP[G.clk]; if(G.clock-run<=0){ G.clock=0; ui.sheet.classList.remove('open'); hud(); return endGame(['Final','Out of time','The clock ran out before you could get the snap off. Bison win 20-16.']); }
+  G.clock-=run; G.phase='live'; ui.sheet.classList.remove('open'); hud(); IDS.forEach(id=>{ const p=P[id]; if(Math.hypot(p.x-form[id][0],p.z-form[id][1])>1.5){ p.x=form[id][0]; p.z=form[id][1]; } });
   const o=resolve(k); live=buildPlay(k,o); live.key=k; tPlay=-.75; G.plays++; }
-function finishPlay(){ const o=live.o, dis=G.def!==G.shown; let big,sub='',bad=false, used=16;
-  const why='Defense ran '+LOOKS[G.def].name.toLowerCase()+(dis?'. They disguised it.':'.');
-  let over=null;
+ui.toBtn.addEventListener('click',callTimeout); ui.spikeBtn.addEventListener('click',spike);
+ui.oobBtn.addEventListener('click',()=>{ if(G.phase!=='call') return; G.oob=!G.oob; controls(); });
+function finishPlay(){ const o=live.o, dis=G.def!==G.shown; let big,sub='',bad=false, used=6;
+  const why=(dis?'They showed '+LOOKS[G.shown].name.toLowerCase()+', then ran '+LOOKS[G.def].name.toLowerCase()+'. ':'Defense ran '+LOOKS[G.def].name.toLowerCase()+'. ')+MATCH[live.key][G.def], gr=grade(live.key,G.def);
+  let over=null, first=false;
   if(o.kind==='int'){ big='Intercepted'; bad=true; over=['Drive over','Picked off','The Bison take over and run out the clock.']; }
-  else if(o.kind==='incomplete'){ big='Incomplete'; bad=true; used=6; }
-  else { const y=o.yards; G.ballOn+=y; if(o.kind==='sack'){ big='Sacked'; sub='Loss of '+(-y); bad=true; used=18; }
-    else { big=y>0?'+'+y+' yards':y===0?'No gain':'Loss of '+(-y); bad=y<=0; }
-    if(o.td){ big='Touchdown!'; sub=''; bad=false; used=6; G.us+=6; over=['Final','Comets win '+G.us+'-'+G.them,'You scored in '+G.plays+(G.plays===1?' play':' plays')+' with '+fmt(Math.max(0,G.clock-used))+' left.']; }
-    else if(y>=G.toGo){ sub='First down'; G.down=1; G.toGo=Math.min(10,100-G.ballOn); G.clock-=used; showBanner(big,sub,why,false); hud(); return next(over); } }
+  else if(o.kind==='incomplete'){ big='Incomplete'; bad=true; used=5; }
+  else { const y=o.yards; G.ballOn+=y; if(o.kind==='sack'){ big='Sacked'; sub='Loss of '+(-y); bad=true; }
+    else { big=y>0?'+'+y+(y===1?' yard':' yards'):y===0?'No gain':'Loss of '+(-y); bad=y<=0; }
+    if(o.td){ big='Touchdown!'; sub=''; bad=false; G.us+=6; over=['Final','Comets win '+G.us+'-'+G.them,'You scored in '+G.plays+(G.plays===1?' play':' plays')+' with '+fmt(Math.max(0,G.clock-used))+' left.']; }
+    else if(y>=G.toGo){ first=true; sub='First down'; G.down=1; G.toGo=Math.min(10,100-G.ballOn); } }
   G.clock-=used;
-  if(!o.td&&o.kind!=='int'){ G.toGo-=o.yards; G.down++; if(G.down>4){ over=['Drive over','Turnover on downs','You came up short on 4th down at the '+(G.ballOn<50?'own '+G.ballOn:'Bison '+(100-G.ballOn))+'.']; G.down=4; } }
+  // college clock rules: incompletions stop it; inside 2:00 out of bounds stops it and a first down stops it until the ready signal
+  const late=G.clock<120;
+  G.clk=o.kind==='incomplete'?'stopped':o.oob?(late?'stopped':'restart'):(first&&late)?'restart':'running';
+  if(o.oob&&!o.td) sub=(sub?sub+'. ':'')+'Out of bounds';
+  if(!first&&!o.td&&o.kind!=='int'){ G.toGo-=o.yards; G.down++; if(G.down>4){ over=['Drive over','Turnover on downs','You came up short on 4th down at the '+(G.ballOn<50?'own '+G.ballOn:'Bison '+(100-G.ballOn))+'.']; G.down=4; } }
   if(!over&&G.clock<=0){ G.clock=0; over=['Final','Out of time','The clock hit zero at the '+(G.ballOn<50?'own '+G.ballOn:'Bison '+(100-G.ballOn))+'. Bison win 20-16.']; }
-  showBanner(big,sub,why,bad); hud(); next(over);
+  showBanner(big,sub,why,bad,gr); hud(); next(over);
 }
 const fmt=s=>((s/60)|0)+':'+String(Math.ceil(s)%60).padStart(2,'0');
 let pending=null;
 function next(over){ G.phase='result'; phaseT=0; pending=over; }
 function endGame(o){ G.phase='over'; ui.banner.classList.remove('on'); $('eEye').textContent=o[0]; $('eHead').textContent=o[1]; $('eText').textContent=o[2]; $('end').hidden=false; $('againBtn').focus(); }
-function reset(){ Object.assign(G,{ballOn:25,down:1,toGo:10,clock:150,us:16,them:20,plays:0}); $('end').hidden=true; $('intro').hidden=true; ui.fade.classList.add('on'); setTimeout(()=>{ startDown(true); focus.x=G.ballOn-50; ui.fade.classList.remove('on'); },230); }
+function reset(){ Object.assign(G,{ballOn:25,down:1,toGo:10,clock:150,us:16,them:20,plays:0,clk:'stopped',timeouts:3,oob:false}); $('end').hidden=true; $('intro').hidden=true; ui.fade.classList.add('on'); setTimeout(()=>{ startDown(true); focus.x=G.ballOn-50; ui.fade.classList.remove('on'); },230); }
 $('startBtn').addEventListener('click',reset); $('againBtn').addEventListener('click',reset);
 
 /* ================= frame loop ================= */
