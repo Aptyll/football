@@ -1,0 +1,65 @@
+/* Layout: one-screen phone game. Full-bleed 3D stadium, broadcast scorebug pinned top, play-call sheet docked bottom. Single dark night-game look by design. */
+:root{
+  color-scheme:dark;
+  --bg:#04070f; --panel:#0e1524; --panel2:#17203a; --line:#2a3555;
+  --fg:#eef2f8; --muted:#9aa8c2; --gold:#ffd21f; --blue:#2f6bff; --red:#d8323f; --good:#39d98a;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Inter",system-ui,sans-serif;
+  --gl:max(12px,env(safe-area-inset-left,0px)); --gr:max(12px,env(safe-area-inset-right,0px));
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.app{position:relative;height:100%;overflow:hidden;touch-action:manipulation}
+.app canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fade{position:absolute;inset:0;background:#04070f;opacity:0;pointer-events:none;transition:opacity .22s}
+.fade.on{opacity:1}
+
+/* scorebug */
+.bug{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:var(--gl);right:var(--gr);display:flex;justify-content:center;pointer-events:none}
+.bug .in{display:flex;align-items:stretch;font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.03em;background:linear-gradient(#1a2233f2,#0b101cf2);border-bottom:3px solid var(--gold);white-space:nowrap;max-width:100%}
+.bug .in>*{display:flex;align-items:center;gap:6px;padding:4px 9px}
+.bug .tm i{width:10px;height:10px;background:var(--tc)}
+.bug .tm b{font-size:23px;min-width:1.1em;text-align:right;font-variant-numeric:tabular-nums}
+.bug .ck{color:#b8c4d8;font-weight:600;font-variant-numeric:tabular-nums}
+.bug .ck.low{color:#ff7a7a}
+.bug .dd{background:var(--gold);color:#111}
+.spot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 50px);left:0;right:0;text-align:center;font-family:var(--display);font-weight:600;letter-spacing:.12em;font-size:13px;color:#cfd8ea;text-shadow:0 1px 3px #000;pointer-events:none}
+
+/* play-call sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#0e1524f5,#090e1af8);border-top:1px solid var(--line);transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+.sheet.open{transform:none}
+.sheet .in{max-width:720px;margin:0 auto;padding-block:10px 0;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:9px}
+.scout{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.scout .lab{font-family:var(--display);font-weight:600;letter-spacing:.12em;font-size:13px;color:var(--muted);text-transform:uppercase}
+.scout .look{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase;background:var(--red);color:#fff;padding:0 8px}
+.scout .tip{color:var(--muted);font-size:13px;min-width:0}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.card{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:6px;padding:7px 8px 8px;display:flex;flex-direction:column;gap:3px;text-align:left;font:inherit;cursor:pointer;min-width:0}
+.card:active{background:#22305a;border-color:var(--gold)}
+.card:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.card svg{width:100%;height:auto;aspect-ratio:64/40;background:#1c6a2d;border-radius:3px}
+.card .nm{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.05;text-transform:uppercase;letter-spacing:.02em}
+.card .tg{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.card .tg.run{color:#7fd6ff}
+.card .nt{font-size:12px;color:var(--muted);line-height:1.25}
+@media (min-width:760px){.cards{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media (max-height:520px){.card svg{display:none}}
+
+/* banners and overlays */
+.banner{position:absolute;left:0;right:0;top:34%;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;padding-left:var(--gl);padding-right:var(--gr);text-align:center}
+.banner.on{opacity:1;transform:none}
+.banner .big{font-family:var(--display);font-weight:700;font-size:clamp(40px,12vw,76px);line-height:.95;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,transparent,#0b101ce6 14%,#0b101ce6 86%,transparent);padding:2px 44px;border-block:2px solid var(--gold)}
+.banner .big.bad{border-color:var(--red)}
+.banner .sub{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 4px #000}
+.banner .wh{font-size:13px;color:#dfe6f3;text-shadow:0 1px 4px #000;background:#0b101cb0;padding:2px 10px;border-radius:3px}
+.over{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at center,#04070fb8,#04070fe8);padding:20px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.over .box{max-width:400px;width:100%;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.over .eye{font-family:var(--display);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-size:14px}
+.over h1{font-family:var(--display);font-weight:700;font-size:clamp(44px,13vw,64px);line-height:.92;margin:0;text-transform:uppercase;text-wrap:balance}
+.over p{margin:0;color:#cdd6e6}
+.over ul{margin:0;padding-left:18px;color:#cdd6e6;display:flex;flex-direction:column;gap:4px}
+.btn{appearance:none;border:0;background:var(--gold);color:#111;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase;padding:10px 22px;border-radius:4px;cursor:pointer;margin-top:4px}
+.btn:active{background:#fff}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.fail{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}

@@ -1,0 +1,437 @@
+<title>Gridiron Style Reel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a film-room reel. One wide live stage per style, notes beside it, stacked down the page. Single dark look on purpose so each scene's own palette carries the colour. */
+:root{
+  color-scheme:dark;
+  --bg:#11151b; --panel:#191f28; --line:#2a323e;
+  --fg:#e8ecf1; --muted:#98a3b3; --accent:#f6c945;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Inter",system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+header{display:flex;flex-direction:column;gap:10px;max-width:62ch}
+.eyebrow{font-family:var(--display);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-size:15px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(40px,7vw,68px);line-height:.95;margin:0;text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+header p{margin:0;color:var(--muted)}
+.style{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);gap:28px;align-items:start}
+.stage{position:relative;aspect-ratio:16/9;max-width:100%;background:var(--panel);border-radius:6px;overflow:hidden;cursor:grab;touch-action:pan-y;outline:1px solid var(--line)}
+.stage:active{cursor:grabbing}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage canvas.px{image-rendering:pixelated}
+.stage canvas.bloom{filter:blur(7px) brightness(1.5);mix-blend-mode:screen;pointer-events:none}
+.hint{position:absolute;right:10px;bottom:8px;font-size:12px;color:#fff;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:3px;pointer-events:none}
+.fail{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);padding:16px;text-align:center}
+.notes{display:flex;flex-direction:column;gap:12px;min-width:0}
+.num{font-family:var(--display);font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-size:14px}
+h2{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;margin:0;text-transform:uppercase;text-wrap:balance}
+.notes p{margin:0;color:var(--muted);font-size:15px}
+.notes p b{color:var(--fg);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips i{width:26px;height:26px;border-radius:3px;outline:1px solid rgba(255,255,255,.14)}
+@media (max-width:820px){.style{grid-template-columns:minmax(0,1fr);gap:16px}.wrap{gap:44px}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Art direction · 1st &amp; 10</div>
+    <h1>Gridiron Style Reel</h1>
+    <p>Five 3D looks for the football game, each running the same play: a deep pass to the right corner of the end zone. Every scene is live. Drag a scene sideways to orbit the camera.</p>
+  </header>
+
+  <section class="style">
+    <div class="stage" data-style="voxel"><span class="hint">Drag to orbit</span></div>
+    <div class="notes">
+      <div class="num">Style 1 of 5</div>
+      <h2>Voxel Sunday</h2>
+      <p>3D pixel art. Everything is built from cubes and rendered at low resolution, so it reads like a pixel sprite you can walk around.</p>
+      <p><b>Mood:</b> bright, playful, toy-box.</p>
+      <p><b>Suits:</b> arcade play, small teams, easy to add lots of characters and stadiums.</p>
+      <div class="chips"><i style="background:#8fd3ff"></i><i style="background:#5fbf4a"></i><i style="background:#e0483e"></i><i style="background:#2f55d4"></i><i style="background:#ffffff"></i></div>
+    </div>
+  </section>
+
+  <section class="style">
+    <div class="stage" data-style="minimal"><span class="hint">Drag to orbit</span></div>
+    <div class="notes">
+      <div class="num">Style 2 of 5</div>
+      <h2>Soft Geometry</h2>
+      <p>Minimalist shapes. Players are smooth pawns, the field is a matte slab, and soft shadows do most of the work.</p>
+      <p><b>Mood:</b> calm, sleek, premium.</p>
+      <p><b>Suits:</b> tactics and play-calling, where reading the whole field matters more than character detail.</p>
+      <div class="chips"><i style="background:#dfe6ee"></i><i style="background:#3fa37a"></i><i style="background:#ff6b5a"></i><i style="background:#1f2a44"></i><i style="background:#ffc93c"></i></div>
+    </div>
+  </section>
+
+  <section class="style">
+    <div class="stage" data-style="lowpoly"><span class="hint">Drag to orbit</span></div>
+    <div class="notes">
+      <div class="num">Style 3 of 5</div>
+      <h2>Golden Hour Low-Poly</h2>
+      <p>Faceted, flat-shaded models lit by a low sun. A small-town field with hills and pines behind the far sideline.</p>
+      <p><b>Mood:</b> warm, nostalgic, a little cinematic.</p>
+      <p><b>Suits:</b> a career or season game with a sense of place.</p>
+      <div class="chips"><i style="background:#f4a55e"></i><i style="background:#6f9a3c"></i><i style="background:#8c2f39"></i><i style="background:#1f7a7a"></i><i style="background:#4a3b63"></i></div>
+    </div>
+  </section>
+
+  <section class="style">
+    <div class="stage" data-style="toon"><span class="hint">Drag to orbit</span></div>
+    <div class="notes">
+      <div class="num">Style 4 of 5</div>
+      <h2>Ink &amp; Cel</h2>
+      <p>Cel shading with thick black outlines and oversized shoulders. Banded light instead of smooth gradients, like a comic panel.</p>
+      <p><b>Mood:</b> loud, bold, funny.</p>
+      <p><b>Suits:</b> over-the-top arcade football with big hits and exaggerated animation.</p>
+      <div class="chips"><i style="background:#ffd23f"></i><i style="background:#3fc04f"></i><i style="background:#e63946"></i><i style="background:#2563eb"></i><i style="background:#111111"></i></div>
+    </div>
+  </section>
+
+  <section class="style">
+    <div class="stage" data-style="neon"><span class="hint">Drag to orbit</span></div>
+    <div class="notes">
+      <div class="num">Style 5 of 5</div>
+      <h2>Night Grid</h2>
+      <p>Glowing wireframe players on a dark grid under a striped sun. Light comes from the lines themselves.</p>
+      <p><b>Mood:</b> retro-futurist, moody, synth soundtrack.</p>
+      <p><b>Suits:</b> a fast score-chasing game where clarity and speed matter.</p>
+      <div class="chips"><i style="background:#070417"></i><i style="background:#22e5ff"></i><i style="background:#ff3da6"></i><i style="background:#ffd84a"></i><i style="background:#3b2a7a"></i></div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const T = window.THREE;
+if(!T){ document.querySelectorAll('.stage').forEach(s=>{const d=document.createElement('div');d.className='fail';d.textContent='The 3D library did not load.';s.appendChild(d)}); return; }
+
+/* ---------- small helpers ---------- */
+let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+const lerp = (a,b,t) => a+(b-a)*t, clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+function M(geo, mat, x=0, y=0, z=0, shadow=true){ const m=new T.Mesh(geo,mat); m.position.set(x,y,z); m.castShadow=shadow; m.receiveShadow=shadow; return m; }
+function pivot(parent, x, y, z, child){ const g=new T.Group(); g.position.set(x,y,z); if(child) g.add(child); parent.add(g); return g; }
+function rig(){ const root=new T.Group(), inner=new T.Group(); root.add(inner); return {root, inner}; }
+
+// Field: 36 x 26 units. Offense drives toward +x. Goal line at x=10, end zone 10..18.
+function fieldLines(mat, y, t){
+  const g=new T.Group();
+  const add=(x,z,w,d)=>{ const m=new T.Mesh(new T.BoxGeometry(w,.02,d),mat); m.position.set(x,y,z); m.receiveShadow=true; g.add(m); };
+  [-15,-10,-5,0,5,10].forEach(x=>add(x,0,t,26));
+  add(0,-13,36+t,t); add(0,13,36+t,t); add(-18,0,t,26); add(18,0,t,26);
+  for(let x=-17;x<10;x++) if(x%5){ add(x,-4,t*.8,.7); add(x,4,t*.8,.7); }
+  return g;
+}
+function goalpost(mat, bar){ // bar(len, thick) -> geometry along Y
+  const g=new T.Group(), th=.22;
+  g.add(M(bar(3,th),mat,19.2,1.5,0));
+  const neck=M(bar(1.4,th),mat,18.6,3,0); neck.rotation.z=Math.PI/2; g.add(neck);
+  const cross=M(bar(6.4,th),mat,18,3,0); cross.rotation.x=Math.PI/2; g.add(cross);
+  g.add(M(bar(5,th),mat,18,5.5,-3.1)); g.add(M(bar(5,th),mat,18,5.5,3.1));
+  return g;
+}
+
+/* ---------- style 1: voxel ---------- */
+const voxel = {
+  ortho:true, halfH:11.5, theta:-.7, phi:.96, px:3, target:[1.5,0,0], bg:0x8fd3ff, shadows:true,
+  teams:[{j:0xe0483e,h:0xffffff,p:0xf2f2f2,s:0xe8b48a},{j:0x2f55d4,h:0xf2c230,p:0x26306b,s:0xb9825c}],
+  world(sc){
+    sc.add(new T.HemisphereLight(0xffffff,0x6aa0c0,.75));
+    const sun=new T.DirectionalLight(0xffffff,.75); sun.position.set(-14,26,16); sc.add(sun); this.sun=sun;
+    const L=m=>new T.MeshLambertMaterial({color:m});
+    const tiles=new T.InstancedMesh(new T.BoxGeometry(1,.5,1), new T.MeshLambertMaterial({color:0xffffff}), 36*26);
+    const d=new T.Object3D(), c=new T.Color(); let n=0;
+    for(let i=-18;i<18;i++) for(let k=-13;k<13;k++){
+      d.position.set(i+.5,-.25,k+.5); d.updateMatrix(); tiles.setMatrixAt(n,d.matrix);
+      const band=Math.floor((i+20)/5)%2, ez=i>=10;
+      let col = ez ? 0xd8483e : (band?0x5fbf4a:0x54b040);
+      const line = (!ez && [-15,-10,-5,0,5].includes(i)) || i===10 || k===-13 || k===12 || i===-18 || i===17;
+      const hash = !ez && (k===-4||k===3) && (((i%2)+2)%2===1);
+      if(line||hash) col=0xffffff;
+      c.setHex(col); if(!line&&!hash) c.offsetHSL(0,0,(rnd()-.5)*.035);
+      tiles.setColorAt(n++,c);
+    }
+    tiles.receiveShadow=true; sc.add(tiles);
+    sc.add(M(new T.BoxGeometry(36,2.5,26),L(0x7a5230),0,-1.75,0));
+    // bleachers and fans behind the far sideline
+    for(let s=0;s<3;s++) sc.add(M(new T.BoxGeometry(30,1+s,1.5),L(0x9aa3ad),0,(1+s)/2-.5-.5,-14.5-s*1.5));
+    const fans=new T.InstancedMesh(new T.BoxGeometry(.7,.9,.7),new T.MeshLambertMaterial({color:0xffffff}),72);
+    const cols=[0xe0483e,0x2f55d4,0xf2c230,0xffffff,0x30364a,0xff8a3d]; n=0;
+    for(let s=0;s<3;s++) for(let x=-14;x<=14;x+=1.2){ if(n>=72) break; d.position.set(x+rnd()*.3,s+.45,-14.5-s*1.5); d.updateMatrix(); fans.setMatrixAt(n,d.matrix); c.setHex(cols[Math.floor(rnd()*cols.length)]); fans.setColorAt(n++,c); }
+    fans.count=n; fans.castShadow=true; sc.add(fans);
+    // clouds
+    [[-12,13,-22],[9,15,-26],[20,12,-18]].forEach(p=>{ const g=new T.Group(); g.add(M(new T.BoxGeometry(5,1.2,2.4),L(0xffffff),0,0,0,false)); g.add(M(new T.BoxGeometry(2.6,1.2,2),L(0xffffff),.6,1.1,0,false)); g.position.set(...p); sc.add(g); });
+    sc.add(goalpost(L(0xf2c230),(l,t)=>new T.BoxGeometry(t*1.4,l,t*1.4)));
+  },
+  player(t){
+    const L=m=>new T.MeshLambertMaterial({color:m}), B=(w,h,d)=>new T.BoxGeometry(w,h,d);
+    const p=rig(), g=p.inner;
+    p.legL=pivot(g,-.22,.72,0,M(B(.34,.72,.36),L(t.p),0,-.36,0));
+    p.legR=pivot(g,.22,.72,0,M(B(.34,.72,.36),L(t.p),0,-.36,0));
+    g.add(M(B(.9,.7,.5),L(t.j),0,1.07,0));
+    g.add(M(B(1.2,.3,.62),L(t.j),0,1.5,0));
+    const arm=()=>{ const a=new T.Group(); a.add(M(B(.26,.45,.28),L(t.j),0,-.22,0)); a.add(M(B(.24,.26,.26),L(t.s),0,-.56,0)); return a; };
+    p.armL=pivot(g,-.66,1.4,0,arm()); p.armR=pivot(g,.66,1.4,0,arm());
+    g.add(M(B(.74,.68,.74),L(t.h),0,2.02,0));
+    g.add(M(B(.14,.7,.76),L(t.j),0,2.03,0));
+    g.add(M(B(.52,.3,.1),L(0x1c1f2b),0,1.95,.36));
+    return p;
+  },
+  ball(){ const g=new T.Group(); g.add(M(new T.BoxGeometry(.34,.34,.62),new T.MeshLambertMaterial({color:0x8a4a22}))); g.add(M(new T.BoxGeometry(.36,.1,.2),new T.MeshLambertMaterial({color:0xffffff}),0,.14,0)); return g; }
+};
+
+/* ---------- style 2: minimal ---------- */
+const minimal = {
+  ortho:true, halfH:11.5, theta:-.62, phi:.9, target:[1.5,0,0], bg:0xdfe6ee, shadows:true,
+  teams:[{j:0xff6b5a},{j:0x1f2a44}],
+  world(sc){
+    sc.add(new T.HemisphereLight(0xffffff,0xcfd8e3,.9));
+    const sun=new T.DirectionalLight(0xffffff,.45); sun.position.set(-10,28,12); sc.add(sun); this.sun=sun; sun.shadow.radius=6;
+    const L=m=>new T.MeshLambertMaterial({color:m});
+    const ground=M(new T.PlaneGeometry(300,300),new T.ShadowMaterial({opacity:.16})); ground.rotation.x=-Math.PI/2; ground.position.y=-.7; ground.castShadow=false; sc.add(ground);
+    sc.add(M(new T.BoxGeometry(38,.7,28),L(0x3fa37a),0,-.35,0));
+    const ez=M(new T.BoxGeometry(8,.02,26),L(0x35906b),14,.01,0,false); ez.receiveShadow=true; sc.add(ez);
+    sc.add(fieldLines(new T.MeshLambertMaterial({color:0xf7fafc}),.03,.12));
+    sc.add(goalpost(L(0xffc93c),(l,t)=>new T.CylinderGeometry(t*.6,t*.6,l,20)));
+  },
+  player(t){
+    const mat=new T.MeshLambertMaterial({color:t.j});
+    const p=rig(), g=p.inner;
+    g.add(M(new T.CylinderGeometry(.3,.52,1.25,32),mat,0,.63,0));
+    const sh=M(new T.SphereGeometry(.5,32,20),mat,0,1.22,0); sh.scale.set(1.25,.5,.8); g.add(sh);
+    g.add(M(new T.SphereGeometry(.4,32,24),mat,0,1.8,0));
+    return p;
+  },
+  ball(){ const b=M(new T.SphereGeometry(.26,24,16),new T.MeshLambertMaterial({color:0xffc93c})); b.scale.set(.62,.62,1.15); const g=new T.Group(); g.add(b); return g; }
+};
+
+/* ---------- style 3: low-poly ---------- */
+const hgt=(x,z)=>{ const out=Math.max(0,Math.max(Math.abs(x)-20,Math.abs(z)-15)); const k=clamp(out/4,0,1); return k*((Math.sin(x*.31)+Math.cos(z*.27))*.7 + .5 + Math.max(0,-z-18)*.42 + Math.max(0,Math.abs(x)-26)*.12); };
+const lowpoly = {
+  fov:38, radius:33, theta:-.38, phi:1.1, bg:0xf4a55e, fog:[0xf4a55e,45,120], shadows:true, target:[2,1,1],
+  teams:[{j:0x8c2f39,h:0xf0dfb8,p:0xf0dfb8,s:0xd9a070},{j:0x1f7a7a,h:0x1b2b3a,p:0x1b2b3a,s:0x9c6a48}],
+  world(sc){
+    sc.add(new T.HemisphereLight(0xffc7a0,0x4a3b63,.62));
+    const sun=new T.DirectionalLight(0xffb060,1.0); sun.position.set(-30,13,10); sc.add(sun); this.sun=sun;
+    const S=(c)=>new T.MeshLambertMaterial({color:c,flatShading:true});
+    const geo=new T.PlaneGeometry(170,170,56,56); geo.rotateX(-Math.PI/2);
+    const pos=geo.attributes.position;
+    for(let i=0;i<pos.count;i++){ const x=pos.getX(i)+(rnd()-.5)*1.4, z=pos.getZ(i)+(rnd()-.5)*1.4; pos.setX(i,x); pos.setZ(i,z); pos.setY(i,hgt(x,z)-.06+(rnd()*.05)); }
+    geo.computeVertexNormals();
+    const terrain=M(geo,S(0x6c8f47)); terrain.castShadow=false; sc.add(terrain);
+    const turf=M(new T.BoxGeometry(36.6,.1,26.6),S(0x6f9a3c),0,.02,0); turf.castShadow=false; sc.add(turf);
+    for(let i=0;i<6;i+=2){ const x0=-18+i*5, w=Math.min(5,10-x0); const b=M(new T.BoxGeometry(w,.02,26),S(0x7dab45),x0+w/2,.09,0,false); b.receiveShadow=true; sc.add(b); }
+    const ez=M(new T.BoxGeometry(8,.02,26),S(0x8c2f39),14,.09,0,false); ez.receiveShadow=true; sc.add(ez);
+    sc.add(fieldLines(new T.MeshLambertMaterial({color:0xfff3df}),.11,.16));
+    sc.add(goalpost(S(0xf2c94c),(l,t)=>new T.CylinderGeometry(t*.6,t*.6,l,5)));
+    // pines and hills
+    const pine=(x,z,s)=>{ const g=new T.Group(); g.add(M(new T.CylinderGeometry(.18,.24,1,5),S(0x5a3a2a),0,.5,0)); g.add(M(new T.ConeGeometry(1.2,2.4,6),S(0x2f5d3a),0,2,0)); g.add(M(new T.ConeGeometry(.85,1.8,6),S(0x3a6f43),0,3.3,0)); g.position.set(x,hgt(x,z)-.1,z); g.scale.setScalar(s); g.rotation.y=rnd()*3; sc.add(g); };
+    for(let i=0;i<70;i++){ const x=(rnd()-.5)*96, z=-17-rnd()*38; pine(x,z,.9+rnd()*.9); }
+    for(let i=0;i<10;i++){ pine(-23-rnd()*14,(rnd()-.5)*24,.9+rnd()*.7); pine(23+rnd()*14,(rnd()-.5)*24,.9+rnd()*.7); }
+    [[-34,-62,17,0x5d4a78],[6,-72,22,0x4a3b63],[42,-60,15,0x6a527f],[-66,-48,13,0x6a527f],[70,-40,12,0x5d4a78]].forEach(h=>{ const m=M(new T.ConeGeometry(h[2]*1.5,h[2],7),S(h[3]),h[0],h[2]/2-1,h[1],false); m.rotation.y=rnd()*3; sc.add(m); });
+    const disc=M(new T.CircleGeometry(9,24),new T.MeshBasicMaterial({color:0xffe9a8,fog:false}),-58,13,-92,false); disc.lookAt(0,6,0); sc.add(disc);
+  },
+  player(t){
+    const S=(c)=>new T.MeshLambertMaterial({color:c,flatShading:true});
+    const p=rig(), g=p.inner;
+    const leg=()=>M(new T.CylinderGeometry(.17,.11,.85,5),S(t.p),0,-.42,0);
+    p.legL=pivot(g,-.2,.85,0,leg()); p.legR=pivot(g,.2,.85,0,leg());
+    g.add(M(new T.CylinderGeometry(.62,.3,.95,6),S(t.j),0,1.3,0));
+    const arm=()=>{ const a=new T.Group(); a.add(M(new T.CylinderGeometry(.15,.1,.75,5),S(t.j),0,-.36,0)); a.add(M(new T.IcosahedronGeometry(.12,0),S(t.s),0,-.78,0)); return a; };
+    p.armL=pivot(g,-.66,1.62,0,arm()); p.armR=pivot(g,.66,1.62,0,arm());
+    g.add(M(new T.IcosahedronGeometry(.4,0),S(t.h),0,2.12,0));
+    g.add(M(new T.BoxGeometry(.4,.16,.12),S(0x2b2b33),0,2.03,.34));
+    return p;
+  },
+  ball(){ const b=M(new T.IcosahedronGeometry(.28,0),new T.MeshLambertMaterial({color:0x7b3f1d,flatShading:true})); b.scale.set(.65,.65,1.2); const g=new T.Group(); g.add(b); return g; }
+};
+
+/* ---------- style 4: toon ---------- */
+const grad=new T.DataTexture(new Uint8Array([95,175,255]),3,1,T.LuminanceFormat); grad.minFilter=grad.magFilter=T.NearestFilter; grad.needsUpdate=true;
+const ink=new T.MeshBasicMaterial({color:0x111111,side:T.BackSide});
+function O(geo, mat, x, y, z, k=1.09){ const m=M(geo,mat,x,y,z,false); const o=new T.Mesh(geo,ink); o.scale.setScalar(k); m.add(o); return m; }
+const toon = {
+  fov:42, radius:31, theta:-.3, phi:1.02, bg:0xffd23f, target:[2,1,1],
+  teams:[{j:0xe63946,h:0xffffff,p:0xffffff,s:0xf2b48c},{j:0x2563eb,h:0xffb703,p:0x16213e,s:0xa8734f}],
+  blob(){ const s=new T.Mesh(new T.CircleGeometry(.75,20),new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28,depthWrite:false})); s.rotation.x=-Math.PI/2; s.position.y=.06; return s; },
+  world(sc){
+    sc.add(new T.AmbientLight(0xffffff,.55));
+    const sun=new T.DirectionalLight(0xffffff,.75); sun.position.set(-8,20,14); sc.add(sun);
+    const TM=c=>new T.MeshToonMaterial({color:c,gradientMap:grad}), Bm=c=>new T.MeshBasicMaterial({color:c});
+    sc.add(M(new T.BoxGeometry(37.4,.5,27.4),Bm(0x111111),0,-.3,0,false));
+    for(let i=0;i<6;i++){ const x0=-18+i*5, w=Math.min(5,10-x0); sc.add(M(new T.BoxGeometry(w,.1,26),Bm(i%2?0x3fc04f:0x35ad45),x0+w/2,-.05,0,false)); }
+    sc.add(M(new T.BoxGeometry(8,.1,26),Bm(0xe63946),14,-.05,0,false));
+    sc.add(fieldLines(Bm(0xffffff),.02,.3));
+    // halftone-style dots on the backdrop
+    const dots=new T.InstancedMesh(new T.CircleGeometry(1,12),new T.MeshBasicMaterial({color:0xffb81f}),260); const d=new T.Object3D(); let n=0;
+    for(let r=0;r<10;r++) for(let c=0;c<26;c++){ d.position.set(-62+c*5+(r%2)*2.5,1+r*4,-42); const s=1.5*(1-r/11); d.scale.set(s,s,s); d.updateMatrix(); dots.setMatrixAt(n++,d.matrix); }
+    sc.add(dots);
+    const gp=new T.Group(), ym=TM(0xffe14d), cyl=(l,r)=>new T.CylinderGeometry(r,r,l,14);
+    gp.add(O(cyl(3,.2),ym,19.2,1.5,0,1)); gp.children[0].children[0].scale.set(1.5,1.02,1.5);
+    const cr=O(cyl(6.6,.2),ym,18,3,0,1); cr.rotation.x=Math.PI/2; cr.children[0].scale.set(1.5,1.02,1.5); gp.add(cr);
+    const nk=O(cyl(1.4,.2),ym,18.6,3,0,1); nk.rotation.z=Math.PI/2; nk.children[0].scale.set(1.5,1.02,1.5); gp.add(nk);
+    [-3.1,3.1].forEach(z=>{ const u=O(cyl(5,.2),ym,18,5.5,z,1); u.children[0].scale.set(1.5,1.02,1.5); gp.add(u); });
+    sc.add(gp);
+  },
+  player(t){
+    const TM=c=>new T.MeshToonMaterial({color:c,gradientMap:grad});
+    const p=rig(), g=p.inner;
+    const leg=()=>{ const a=new T.Group(); a.add(O(new T.CylinderGeometry(.17,.13,.6,12),TM(t.p),0,-.3,0,1.16)); const f=O(new T.SphereGeometry(.19,12,10),TM(0x222222),0,-.62,.08,1.14); f.scale.set(1,.7,1.5); a.add(f); return a; };
+    p.legL=pivot(g,-.24,.75,0,leg()); p.legR=pivot(g,.24,.75,0,leg());
+    const torso=O(new T.SphereGeometry(.62,20,16),TM(t.j),0,1.28,0,1.07); torso.scale.set(1.25,.95,.8); g.add(torso);
+    const arm=()=>{ const a=new T.Group(); a.add(O(new T.CylinderGeometry(.16,.13,.55,12),TM(t.j),0,-.3,0,1.16)); a.add(O(new T.SphereGeometry(.2,12,10),TM(t.s),0,-.68,0,1.13)); return a; };
+    p.armL=pivot(g,-.82,1.45,0,arm()); p.armR=pivot(g,.82,1.45,0,arm());
+    g.add(O(new T.SphereGeometry(.48,20,16),TM(t.h),0,2.15,0,1.08));
+    const stripe=M(new T.TorusGeometry(.485,.045,8,24,Math.PI),TM(t.j),0,2.15,0,false); stripe.rotation.y=Math.PI/2; g.add(stripe);
+    g.add(M(new T.BoxGeometry(.5,.2,.1),new T.MeshBasicMaterial({color:0x111111}),0,2.08,.44,false));
+    return p;
+  },
+  ball(){ const b=O(new T.SphereGeometry(.3,16,12),new T.MeshToonMaterial({color:0x9a4f1f,gradientMap:grad}),0,0,0,1.14); b.scale.set(.62,.62,1.2); const g=new T.Group(); g.add(b); return g; }
+};
+
+/* ---------- style 5: neon ---------- */
+const neon = {
+  fov:44, radius:30, theta:-.25, phi:1.2, bg:0x070417, fog:[0x070417,40,110], bloom:true, target:[2,1.5,1],
+  teams:[{j:0x22e5ff},{j:0xff3da6}],
+  blob(t){ const s=new T.Mesh(new T.RingGeometry(.55,.72,24),new T.MeshBasicMaterial({color:t.j,transparent:true,opacity:.75,blending:T.AdditiveBlending,depthWrite:false})); s.rotation.x=-Math.PI/2; s.position.y=.05; return s; },
+  world(sc){
+    const Bm=(c,o)=>new T.MeshBasicMaterial(Object.assign({color:c},o||{}));
+    const floor=M(new T.PlaneGeometry(400,400),Bm(0x090520),0,-.02,0,false); floor.rotation.x=-Math.PI/2; sc.add(floor);
+    const grid=new T.GridHelper(200,100,0x3b2a7a,0x2a1d5c); grid.position.y=0; sc.add(grid);
+    sc.add(M(new T.PlaneGeometry(36,26).rotateX(-Math.PI/2),Bm(0x0d0830),0,.01,0,false));
+    sc.add(fieldLines(Bm(0x22e5ff),.04,.1));
+    const ez=fieldLines(Bm(0xff3da6),.05,.14); ez.children=ez.children.filter((c,i)=>i===5||i===9); sc.add(ez);
+    [-13,13].forEach(z=>{ const m=new T.Mesh(new T.BoxGeometry(8,.02,.14),Bm(0xff3da6)); m.position.set(14,.05,z); sc.add(m); });
+    sc.add(goalpost(Bm(0xffd84a),(l,t)=>new T.BoxGeometry(t*.6,l,t*.6)));
+    // striped sun
+    const cv=document.createElement('canvas'); cv.width=cv.height=256; const x=cv.getContext('2d');
+    const gr=x.createLinearGradient(0,0,0,256); gr.addColorStop(0,'#ffe45c'); gr.addColorStop(.55,'#ff7a3d'); gr.addColorStop(1,'#ff2e9a');
+    x.fillStyle=gr; x.beginPath(); x.arc(128,128,126,0,7); x.fill();
+    x.globalCompositeOperation='destination-out'; for(let i=0;i<7;i++){ x.fillRect(0,132+i*18,256,3+i*1.7); }
+    const sun=new T.Mesh(new T.PlaneGeometry(46,46),new T.MeshBasicMaterial({map:new T.CanvasTexture(cv),transparent:true,fog:false,depthWrite:false})); sun.position.set(8,13,-105); sc.add(sun);
+    // far ridge
+    const pts=[]; let px=-140; while(px<140){ const h=2+rnd()*9; pts.push(new T.Vector3(px,0,-98),new T.Vector3(px+6,h,-98),new T.Vector3(px+6,h,-98),new T.Vector3(px+12,0,-98)); px+=12; }
+    sc.add(new T.LineSegments(new T.BufferGeometry().setFromPoints(pts),new T.LineBasicMaterial({color:0xb04dff,fog:false})));
+  },
+  player(t){
+    const fill=new T.MeshBasicMaterial({color:0x0b0726}), line=new T.LineBasicMaterial({color:t.j});
+    const W=(geo,x,y,z)=>{ const m=M(geo,fill,x,y,z,false); m.add(new T.LineSegments(new T.EdgesGeometry(geo),line)); return m; };
+    const p=rig(), g=p.inner;
+    p.legL=pivot(g,-.22,.85,0,W(new T.BoxGeometry(.26,.85,.26),0,-.42,0)); p.legR=pivot(g,.22,.85,0,W(new T.BoxGeometry(.26,.85,.26),0,-.42,0));
+    g.add(W(new T.CylinderGeometry(.66,.32,.9,4,1),0,1.3,0)).rotation.y=Math.PI/4;
+    p.armL=pivot(g,-.7,1.65,0,W(new T.BoxGeometry(.2,.8,.2),0,-.4,0)); p.armR=pivot(g,.7,1.65,0,W(new T.BoxGeometry(.2,.8,.2),0,-.4,0));
+    g.add(W(new T.OctahedronGeometry(.42,0),0,2.15,0));
+    return p;
+  },
+  ball(){ const geo=new T.OctahedronGeometry(.3,0); const b=new T.Mesh(geo,new T.MeshBasicMaterial({color:0xffd84a})); b.scale.set(.6,.6,1.3); const g=new T.Group(); g.add(b); return g; }
+};
+
+const STYLES={voxel,minimal,lowpoly,toon,neon};
+
+/* ---------- the play (shared by every style) ---------- */
+// [role, team, x, z]
+const ROSTER=[
+  ['ol',0,-5,-2.4],['ol',0,-5,0],['ol',0,-5,2.4],['qb',0,-8.5,0],['rb',0,-10.5,2.2],['wr1',0,-5,9.5],['wr2',0,-5,-9.5],
+  ['dl',1,-3,-2.4],['dl',1,-3,0],['dl',1,-3,2.4],['lb',1,.5,-1],['cb1',1,-1.5,9.5],['cb2',1,-1.5,-9.5],['s',1,7,1]
+];
+const CYCLE=6.4, SNAP=1.3, PLAY=3.5;
+function route(u){ u=clamp(u,0,1); const a=[-5,9.5],b=[5,9.5],c=[14.5,4];
+  if(u<.45){ const k=u/.45; return [lerp(a[0],b[0],k),a[1]]; }
+  const k=Math.min(1,(u-.45)/.45), e=k*(2-k); return [lerp(b[0],c[0],e),lerp(b[1],c[1],e)]; }
+const THROW=.33, CATCH=.8;
+
+function makeScene(stage){
+  const st=STYLES[stage.dataset.style];
+  let renderer;
+  try{ renderer=new T.WebGLRenderer({antialias:!st.px}); }
+  catch(e){ const d=document.createElement('div'); d.className='fail'; d.textContent='WebGL is not available in this view.'; stage.appendChild(d); return null; }
+  const cv=renderer.domElement; if(st.px) cv.classList.add('px'); stage.insertBefore(cv,stage.firstChild);
+  let bloom=null, bctx=null;
+  if(st.bloom){ bloom=document.createElement('canvas'); bloom.className='bloom'; stage.insertBefore(bloom,cv.nextSibling); bctx=bloom.getContext('2d'); }
+  const sc=new T.Scene(); sc.background=new T.Color(st.bg);
+  if(st.fog) sc.fog=new T.Fog(st.fog[0],st.fog[1],st.fog[2]);
+  const cam=st.ortho?new T.OrthographicCamera(-1,1,1,-1,-100,300):new T.PerspectiveCamera(st.fov,16/9,.5,400);
+  st.world(sc);
+  if(st.shadows){ renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
+    const s=st.sun; s.castShadow=true; s.shadow.mapSize.set(2048,2048); const c=s.shadow.camera; c.left=-30;c.right=30;c.top=30;c.bottom=-30;c.near=1;c.far=90; s.shadow.bias=-.0006; s.shadow.normalBias=.03; }
+  const players=ROSTER.map((r,i)=>{ const team=st.teams[r[1]]; const p=st.player(team); p.role=r[0]; p.team=r[1]; p.home=[r[2],r[3]]; p.x=r[2]; p.z=r[3]; p.seed=i*1.7; p.yaw=r[1]?-Math.PI/2:Math.PI/2; p.root.position.set(p.x,0,p.z); p.root.rotation.y=p.yaw; sc.add(p.root);
+    if(st.blob){ p.blob=st.blob(team); sc.add(p.blob); } return p; });
+  const by={}; players.forEach(p=>by[p.role]=p);
+  const ball=st.ball(); sc.add(ball);
+  const orbit={theta:st.theta,phi:st.phi,base:st.theta,drag:false};
+  const tgt=new T.Vector3(...(st.target||[0,0,0]));
+  let W=0,H=0;
+  function resize(){ const w=stage.clientWidth,h=stage.clientHeight; if(!w||!h||(w===W&&h===H)) return; W=w;H=h;
+    const pr=st.px?1/st.px:Math.min(window.devicePixelRatio||1,2); renderer.setPixelRatio(pr); renderer.setSize(w,h,false);
+    if(st.ortho){ const a=w/h; cam.left=-st.halfH*a; cam.right=st.halfH*a; cam.top=st.halfH; cam.bottom=-st.halfH; } else cam.aspect=w/h;
+    cam.updateProjectionMatrix(); if(bloom){ bloom.width=Math.round(w/3); bloom.height=Math.round(h/3); } }
+  stage.addEventListener('pointerdown',e=>{ orbit.drag=true; orbit.lx=e.clientX; orbit.ly=e.clientY; });
+  window.addEventListener('pointerup',()=>orbit.drag=false); window.addEventListener('pointercancel',()=>orbit.drag=false);
+  stage.addEventListener('pointermove',e=>{ if(!orbit.drag) return; orbit.theta=clamp(orbit.theta-(e.clientX-orbit.lx)*.006,orbit.base-1.1,orbit.base+1.1); orbit.phi=clamp(orbit.phi-(e.clientY-orbit.ly)*.004,.45,1.35); orbit.lx=e.clientX; orbit.ly=e.clientY; });
+
+  function place(p,x,z,time,dt,o){
+    const dx=x-p.x, dz=z-p.z, dist=Math.hypot(dx,dz), speed=dist/Math.max(dt,.001);
+    const moving=speed>.7&&dist<2;
+    p.x=x; p.z=z;
+    let yawT = moving?Math.atan2(dx,dz):(o.face!==undefined?o.face:(p.team?-Math.PI/2:Math.PI/2));
+    let dy=yawT-p.yaw; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); p.yaw+=dy*Math.min(1,dt*12);
+    const s=Math.sin(time*13+p.seed); let y=0, lean=o.lean||0, leg=0, arm=0, armsUp=0;
+    if(moving){ leg=s*.9; arm=-s*.7; y=Math.abs(s)*.14; lean=.2; }
+    if(o.cheer){ y=Math.abs(Math.sin(time*7))*.9; armsUp=1; lean=-.1; }
+    if(o.shove){ arm=-1.2; lean=.35; }
+    if(o.pass){ arm=0; }
+    p.root.position.set(x,y,z); p.root.rotation.y=p.yaw; p.inner.rotation.x+= (lean-p.inner.rotation.x)*Math.min(1,dt*10);
+    if(p.legL){ p.legL.rotation.x=leg; p.legR.rotation.x=-leg; }
+    if(p.armL){ if(armsUp){ p.armL.rotation.x=p.armR.rotation.x=-2.8; } else if(o.shove){ p.armL.rotation.x=p.armR.rotation.x=arm; } else { p.armL.rotation.x=arm; p.armR.rotation.x=o.pass?-2.2*o.pass:-arm; } }
+    if(p.blob){ p.blob.position.x=x; p.blob.position.z=z; const k=1-y*.35; p.blob.scale.set(k,k,k); }
+  }
+  const hold=(p,h)=>new T.Vector3(p.x+Math.sin(p.yaw)*.5,(h||1.25)+p.root.position.y,p.z+Math.cos(p.yaw)*.5);
+  const v=new T.Vector3(), from=new T.Vector3(-10.5+.5,1.7,0);
+
+  function frame(time,dt){
+    resize();
+    const t=time%CYCLE, u=clamp((t-SNAP)/PLAY,0,1), pre=t<SNAP, done=t>SNAP+PLAY*CATCH+.25;
+    const ue=u*(2-u)*.5+u*.5;
+    for(const p of players){
+      const [hx,hz]=p.home, j=Math.sin(time*9+p.seed)*.12*(pre?0:1);
+      switch(p.role){
+        case 'ol': place(p,hx+.5*Math.min(1,u*4)+j,hz,time,dt,{lean:pre?.5:0,shove:!pre}); break;
+        case 'dl': place(p,hx-.45*Math.min(1,u*4)+j,hz,time,dt,{lean:pre?.5:0,shove:!pre}); break;
+        case 'qb': { const k=Math.min(1,u/.28); const w=clamp(1-Math.abs(u-THROW)/.09,0,1); place(p,hx-2*k,hz,time,dt,{face:Math.PI/2-.35*(u>.2?1:0),pass:w}); break; }
+        case 'rb': { const k=clamp(u/.6,0,1); place(p,lerp(hx,-5.5,k),lerp(hz,6,k),time,dt,{}); break; }
+        case 'wr1': { const r=route(u); place(p,r[0],r[1],time,dt,{cheer:done,face:done?0:undefined}); break; }
+        case 'cb1': { const r=route(u-.1); const k=Math.min(1,u*6); place(p,lerp(hx,r[0]+1.3,k),lerp(hz,r[1]+.4,k),time,dt,{}); break; }
+        case 'wr2': place(p,lerp(hx,8,ue),hz,time,dt,{}); break;
+        case 'cb2': place(p,lerp(hx,9.5,clamp(u*1.05-.05,0,1)),hz+.6*u,time,dt,{}); break;
+        case 'lb': { const k=clamp(u/.7,0,1); place(p,lerp(hx,3,k),lerp(hz,5,k),time,dt,{}); break; }
+        case 's': { const k=clamp((u-.25)/.6,0,1); place(p,lerp(hx,12,k),lerp(hz,2,k),time,dt,{}); break; }
+      }
+    }
+    // ball
+    if(u<THROW){ ball.position.copy(hold(by.qb,1.3)); ball.rotation.set(0,by.qb.yaw,0); }
+    else if(u<CATCH){ const s=(u-THROW)/(CATCH-THROW), r=route(CATCH); const f=k=>v.set(lerp(from.x,r[0],k),lerp(from.y,1.5,k)+5*4*k*(1-k)*.9,lerp(from.z,r[1],k));
+      f(Math.min(1,s+.02)); const ax=v.x,ay=v.y,az=v.z; f(s); ball.position.copy(v); ball.lookAt(ax,ay,az); ball.rotateZ(time*22); }
+    else { const w=by.wr1; if(done){ ball.position.set(w.x,2.9+w.root.position.y,w.z); ball.rotation.set(0,time*3,.5); } else { ball.position.copy(hold(w,1.3)); ball.rotation.set(0,w.yaw,0); } }
+    // camera
+    const th=orbit.theta+(orbit.drag?0:Math.sin(time*.25)*.06), ph=orbit.phi, R=st.radius||60;
+    cam.position.set(tgt.x+R*Math.sin(ph)*Math.sin(th),tgt.y+R*Math.cos(ph),tgt.z+R*Math.sin(ph)*Math.cos(th)); cam.lookAt(tgt);
+    renderer.render(sc,cam);
+    if(bctx){ bctx.clearRect(0,0,bloom.width,bloom.height); bctx.drawImage(cv,0,0,bloom.width,bloom.height); }
+  }
+  return {stage,frame,visible:true};
+}
+
+const scenes=[...document.querySelectorAll('.stage')].map(s=>{ try{ return makeScene(s); }catch(e){ console.error(s.dataset.style,e); const d=document.createElement('div'); d.className='fail'; d.textContent='This scene failed to start.'; s.appendChild(d); return null; } }).filter(Boolean);
+if('IntersectionObserver' in window){ const io=new IntersectionObserver(es=>es.forEach(e=>{ const s=scenes.find(x=>x.stage===e.target); if(s) s.visible=e.isIntersecting; }),{rootMargin:'120px'}); scenes.forEach(s=>io.observe(s.stage)); }
+const still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let last=performance.now(), clock=0;
+function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now; if(!still) clock+=dt;
+  const time=still?SNAP+PLAY*.62:clock;
+  for(const s of scenes) if(s.visible){ try{ s.frame(time,dt); }catch(e){ console.error(e); s.visible=false; } }
+  requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+})();
+</script>

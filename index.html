@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Prime Time Drive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles/game.css">
+</head>
+<body>
+<!-- app:start (tools/build.mjs copies everything between these markers into the single-file build) -->
+<div class="app" id="app">
+  <div class="fade" id="fade"></div>
+  <div class="bug"><div class="in">
+    <span class="tm" style="--tc:#2f55d6"><i></i>COM <b id="sUs">16</b></span>
+    <span class="tm" style="--tc:#d8323f"><i></i>BIS <b id="sThem">20</b></span>
+    <span class="ck" id="clock">4TH 2:30</span>
+    <span class="dd" id="dd">1ST &amp; 10</span>
+  </div></div>
+  <div class="spot" id="spot">BALL ON OWN 25</div>
+
+  <div class="banner" id="banner"><div class="big" id="bBig"></div><div class="sub" id="bSub"></div><div class="wh" id="bWhy"></div></div>
+
+  <div class="sheet" id="sheet"><div class="in">
+    <div class="scout"><span class="lab">Defense shows</span><span class="look" id="look">Blitz</span><span class="tip" id="tip"></span></div>
+    <div class="cards" id="cards"></div>
+  </div></div>
+
+  <div class="over" id="intro"><div class="box">
+    <div class="eye">4th quarter &middot; 2:30 left</div>
+    <h1>One drive to win it</h1>
+    <p>You coach the Comets, down 20&ndash;16. The ball is on your own 25. Score a touchdown before the clock runs out.</p>
+    <ul>
+      <li>Read the defense, then tap a play.</li>
+      <li>Four downs to gain ten yards. A field goal is not enough.</li>
+      <li>The look they show is right about three times in four.</li>
+    </ul>
+    <button class="btn" id="startBtn" type="button">Start the drive</button>
+  </div></div>
+  <div class="over" id="end" hidden><div class="box">
+    <div class="eye" id="eEye"></div>
+    <h1 id="eHead"></h1>
+    <p id="eText"></p>
+    <button class="btn" id="againBtn" type="button">Run it back</button>
+  </div></div>
+</div>
+<!-- app:end -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
