@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#9e1b32">
+<title>Season Trail</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* Season Trail prototype (Direction A). Self-contained: opens by double-click on a PC or phone.
+   Rules and odds are a snapshot of game.html / src/rules as of 2026-11-21. When the src/ refactor
+   lands, this UI moves into src/ui and imports the real rules instead of this copy. */
+:root{
+  --crim:#9e1b32;--crim2:#c4183a;--crimL:#e44a66;--crimD:#6e0f22;
+  --ink:#3a1020;--soft:#8a5a68;--cream:#fff6e8;--pink:#ffe3e8;--line:#f0c6cf;
+  --gold:#ffd84d;--gold2:#f2a900;--goldD:#a66b00;
+  --run1:#ffb340;--run2:#f27b00;--runD:#a85200;
+  --pass1:#4fb3ff;--pass2:#1f7de0;--passD:#0f4f99;
+  --trk1:#c07bff;--trk2:#8a3fe0;--trkD:#5a1fa0;
+  --go1:#5fd36f;--go2:#2a9d4b;--goD:#17622d;
+  --top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#2a0d16;font:800 17px/1.3 Nunito,system-ui,sans-serif;color:var(--ink);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.title{font-family:'Lilita One',Nunito,sans-serif;font-weight:400;letter-spacing:.4px}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;overflow:hidden;background:linear-gradient(#ffe3e8,#fff3e6)}
+.screen{position:absolute;inset:0;display:none}
+.screen.on{display:block}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+.press{transition:transform .08s}
+.press:active{transform:translateY(4px) scale(.98)}
+
+/* ---------- glossy button ---------- */
+.gloss{border-radius:24px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.2);box-shadow:0 7px 0 var(--d),inset 0 4px 0 rgba(255,255,255,.35)}
+.gloss:active{box-shadow:0 3px 0 var(--d),inset 0 4px 0 rgba(255,255,255,.35)}
+.g-crim{background:linear-gradient(var(--crimL),#a81d38);--d:var(--crimD)}
+.g-go{background:linear-gradient(var(--go1),var(--go2));--d:var(--goD)}
+.g-gold{background:linear-gradient(#ffdd55,#f4a100);--d:#c47f00;color:#5a2a00;text-shadow:none}
+
+/* ---------- MAP ---------- */
+#map{background:radial-gradient(120% 60% at 50% 0%,#ffd9e0 0%,#ffeef1 45%,#fff6e8 100%)}
+#map .scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+#map .trailbox{position:relative;width:100%}
+#map svg{position:absolute;left:0;top:0}
+.topbar{position:absolute;top:calc(var(--top) + 14px);left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;z-index:5;pointer-events:none}
+.pill{pointer-events:auto;background:#fff;border-radius:999px;padding:6px 14px 6px 8px;font-weight:900;font-size:16px;display:flex;align-items:center;gap:6px;box-shadow:0 3px 0 #e8b9c3}
+.pill .coin{width:24px;height:24px;border-radius:50%;background:linear-gradient(#ffd34d,#f2a900);box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
+.node{position:absolute;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;display:grid;place-items:center;font:24px 'Lilita One',sans-serif;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.18),inset 0 3px 0 rgba(255,255,255,.45)}
+.node.done{background:linear-gradient(#d23a55,#9e1b32)}
+.node.lock{background:linear-gradient(#e7dfe2,#c9bec3);color:#8b7f85}
+.node.cur{width:78px;height:78px;margin:-39px 0 0 -39px;font-size:30px;background:linear-gradient(#ffdd55,#f4a100);color:#5a2a00;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 6px rgba(255,214,77,.35),0 6px 0 #c47f00,inset 0 3px 0 rgba(255,255,255,.6)}50%{box-shadow:0 0 0 14px rgba(255,214,77,.15),0 6px 0 #c47f00,inset 0 3px 0 rgba(255,255,255,.6)}}
+.nstars{position:absolute;transform:translate(-50%,0);font-size:16px;letter-spacing:-1px;color:var(--gold2);text-shadow:0 1px 0 var(--goldD);white-space:nowrap}
+.nstars .off{color:#d8cdd1;text-shadow:none}
+.wklabel{position:absolute;transform:translate(-50%,0);font-size:13px;font-weight:900;color:#a07985;white-space:nowrap}
+.mapbottom{position:absolute;left:0;right:0;bottom:0;padding:16px 20px calc(var(--bot) + 22px);background:linear-gradient(transparent,#fff6e8 30%)}
+.weekcard{background:#fff;border-radius:20px;padding:12px 16px;margin-bottom:14px;box-shadow:0 4px 0 var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.weekcard b{display:block;font-size:19px;font-weight:900}
+.weekcard span{color:var(--soft);font-size:15px}
+.weekcard .need{text-align:right;font-size:14px;color:var(--soft);line-height:1.35}
+.bigbtn{display:block;width:100%;height:72px;font:30px 'Lilita One',sans-serif;letter-spacing:1px}
+
+/* ---------- PLAY ---------- */
+#play{background:linear-gradient(#ffe3e8,#fff3e6)}
+.pwrap{position:absolute;inset:0;display:flex;flex-direction:column;gap:9px;padding:calc(var(--top) + 12px) 14px calc(var(--bot) + 16px)}
+.score{flex:none;height:60px;border-radius:22px;background:linear-gradient(#b8233f,#8a1428);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#fff;box-shadow:0 5px 0 #5c0c1b,inset 0 3px 0 rgba(255,255,255,.25)}
+.score .t{font:15px 'Lilita One',sans-serif;opacity:.85;letter-spacing:.5px}
+.score .n{font:32px/1 'Lilita One',sans-serif}
+.score .mid{text-align:center;background:rgba(0,0,0,.22);border-radius:14px;padding:4px 14px;min-width:110px}
+.score .mid b{display:block;font:24px/1.1 'Lilita One',sans-serif}
+.score .mid span{font-size:15px;font-weight:900}
+.score .back{position:absolute;left:0;top:0}
+.goal{flex:none;background:#fff;border-radius:18px;padding:8px 14px 9px;box-shadow:0 4px 0 var(--line)}
+.goal .row{display:flex;justify-content:space-between;align-items:baseline;font-weight:900;font-size:17px;gap:8px}
+.goal .row span{color:var(--crim);white-space:nowrap}
+.bar{height:12px;border-radius:9px;background:#f5e3e7;margin-top:6px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:9px;background:linear-gradient(#ffdd55,#f2a900);transition:width .6s cubic-bezier(.3,1.4,.5,1)}
+.starsline{display:flex;gap:10px;margin-top:6px;font-size:13px;color:var(--soft);font-weight:800;flex-wrap:wrap}
+.starsline em{font-style:normal;white-space:nowrap}
+.starsline em.ok{color:#2a9d4b}
+.starsline em.lost{color:#c9b2b9;text-decoration:line-through}
+.field{flex:1 1 auto;min-height:130px;position:relative;border-radius:24px;overflow:hidden;background:#53b351;box-shadow:inset 0 0 0 4px rgba(255,255,255,.5),0 5px 0 #3e8f3c}
+.field .strip{position:absolute;inset:0;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.yl{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:rgba(255,255,255,.75)}
+.yn{position:absolute;bottom:8px;font:16px 'Lilita One',sans-serif;color:rgba(255,255,255,.85);transform:translateX(-50%)}
+.ez{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,#b8233f 0 14px,#a51c36 14px 28px)}
+.ez span{position:absolute;inset:0;display:grid;place-items:center;font:22px 'Lilita One',sans-serif;color:#fff;writing-mode:vertical-rl;letter-spacing:4px}
+.los{position:absolute;top:0;bottom:0;width:5px;margin-left:-2px;background:#5aa9ff}
+.fd{position:absolute;top:0;bottom:0;width:5px;margin-left:-2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.dot{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:3px solid #fff;transition:left .7s,top .7s}
+.dot.us{background:var(--crim2)}.dot.them{background:#4a3a2a}
+.ball{position:absolute;width:30px;height:20px;margin:-10px 0 0 -15px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#c2703a,#7a3a14);border:2px solid #fff;z-index:3}
+.look{position:absolute;top:10px;left:10px;background:#fff;border-radius:999px;padding:5px 13px;font-weight:900;font-size:16px;box-shadow:0 3px 0 rgba(0,0,0,.15);z-index:4}
+.look b{color:var(--crim2)}
+.look small{display:none}
+.pop{position:absolute;left:0;right:0;top:58%;transform:translateY(-50%) scale(.4);opacity:0;text-align:center;z-index:6;pointer-events:none;padding:10px 0;background:linear-gradient(90deg,transparent,rgba(60,10,25,.55) 20%,rgba(60,10,25,.55) 80%,transparent)}
+.pop b{display:block;font:44px/1 'Lilita One',sans-serif;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.25),0 0 18px rgba(0,0,0,.25)}
+.pop span{display:inline-block;margin-top:6px;background:#fff;border-radius:999px;padding:4px 14px;font-weight:900;font-size:16px;color:var(--ink)}
+.pop.show{animation:pop .45s cubic-bezier(.2,1.6,.4,1) forwards}
+.pop.bad b{color:#ffe1e6}
+@keyframes pop{to{opacity:1;transform:translateY(-50%) scale(1)}}
+.boost{flex:none;display:flex;gap:8px}
+.boost button{flex:1;background:#fff;border-radius:16px;padding:5px 4px 5px;text-align:center;font-weight:900;font-size:14px;line-height:1.15;box-shadow:0 4px 0 var(--line);position:relative}
+.boost button b{display:block;font:19px/1.05 'Lilita One',sans-serif;color:var(--crim)}
+.boost button sup{position:absolute;top:-7px;right:-3px;background:#2a9d4b;color:#fff;border-radius:999px;font-size:12px;padding:1px 7px;border:2px solid #fff}
+.boost button.locked{opacity:.55}
+.boost button.locked b{color:#b9a2a9}
+.boost button.used sup{background:#c9b2b9}
+.plays{flex:none;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 10px}
+.pb{height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px 4px 6px;font:18px/1.02 'Lilita One',sans-serif;text-align:center;position:relative}
+.pb small{display:block;font:800 13px/1.15 Nunito,sans-serif;opacity:.95;text-shadow:none;margin-top:2px}
+.pb svg{flex:none}
+.pb.run{background:linear-gradient(var(--run1),var(--run2));--d:var(--runD)}
+.pb.pass{background:linear-gradient(var(--pass1),var(--pass2));--d:var(--passD)}
+.pb.trick{background:linear-gradient(var(--trk1),var(--trk2));--d:var(--trkD)}
+.pb.coach{outline:4px solid var(--gold);outline-offset:3px;animation:wig 1s ease-in-out 2}
+@keyframes wig{25%{transform:rotate(-2deg)}75%{transform:rotate(2deg)}}
+.plays.busy .pb{filter:saturate(.4) brightness(1.05);pointer-events:none}
+.tipline{flex:none;min-height:44px;display:flex;align-items:center;background:#fff;border-radius:16px;padding:6px 14px;font-size:16px;font-weight:800;line-height:1.25;box-shadow:0 4px 0 var(--line)}
+.tipline.coachy{background:#fffbe6;box-shadow:0 4px 0 #f1dc8a}
+.tipline.on{animation:pop2 .3s ease-out}
+@keyframes pop2{from{opacity:0;transform:translateY(8px)}}
+
+/* ---------- END ---------- */
+#end{overflow:hidden}
+.rays{position:absolute;inset:-40%;background:repeating-conic-gradient(from 0deg at 50% 50%,#c4183a 0 10deg,#a8122f 10deg 20deg);animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lose .rays{background:repeating-conic-gradient(from 0deg at 50% 50%,#7d5562 0 10deg,#6f4b57 10deg 20deg)}
+.glow{position:absolute;left:50%;top:30%;width:460px;height:460px;transform:translate(-50%,-50%);background:radial-gradient(#ffdf6b 0,#ffb84d22 45%,transparent 65%)}
+.lose .glow{opacity:.35}
+.endwrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:calc(var(--top) + 40px) 22px calc(var(--bot) + 24px)}
+.bigstars{display:flex;justify-content:center;align-items:flex-end;gap:6px;height:100px}
+.bigstars svg{transform:scale(0);opacity:0}
+.bigstars svg.in{animation:starin .5s cubic-bezier(.2,1.8,.4,1) forwards}
+@keyframes starin{to{transform:scale(1);opacity:1}}
+.headline{margin-top:10px;text-align:center;font:56px/.95 'Lilita One',sans-serif;color:#fff;text-shadow:0 5px 0 var(--crimD),0 0 24px rgba(0,0,0,.25);transform:rotate(-4deg) scale(.3);opacity:0;animation:hl .55s .15s cubic-bezier(.2,1.6,.4,1) forwards}
+.lose .headline{font-size:46px;text-shadow:0 5px 0 #3e2730}
+@keyframes hl{to{transform:rotate(-4deg) scale(1);opacity:1}}
+.card{margin-top:auto;width:100%;background:#fff;border-radius:26px;padding:16px 18px;box-shadow:0 7px 0 var(--crimD)}
+.card h4{font:23px 'Lilita One',sans-serif;color:var(--crim);text-align:center;margin-bottom:4px}
+.card p{text-align:center;color:var(--soft);font-size:16px;margin-bottom:6px}
+.st{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:16px;padding:8px 0;border-bottom:2px dashed #f2dbe0}
+.st:last-child{border:0}
+.st b{font-weight:900;white-space:nowrap}
+.st b.ok{color:#2a9d4b}.st b.no{color:#b9a2a9}
+.endbtns{width:100%;margin-top:18px;display:flex;flex-direction:column;gap:14px}
+.endbtns .bigbtn{height:68px;font-size:27px}
+.linkbtn{font-weight:900;font-size:17px;color:#fff;text-decoration:underline;text-underline-offset:3px;padding:6px}
+.confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.mute{position:absolute;right:14px;top:calc(var(--top) + 14px);z-index:6}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- MAP -->
+  <section class="screen on" id="map">
+    <div class="scroll" id="mapScroll"><div class="trailbox" id="trail"></div></div>
+    <div class="topbar"><div class="pill"><span class="coin"></span><span id="starTotal">0</span> stars</div><button class="pill press" id="muteBtn" style="padding-left:14px" aria-label="Sound">Sound: on</button></div>
+    <div class="mapbottom">
+      <div class="weekcard"><div><b id="wkTitle">Week 1 vs Rams</b><span id="wkSub">Down 4, 3:00 left</span></div><div class="need" id="wkNeed">Need a TD<br>Own 30</div></div>
+      <button class="bigbtn gloss g-crim press title" id="playBtn">PLAY WEEK 1</button>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="play">
+    <div class="pwrap">
+      <div class="score"><div><div class="t">CRIMSON</div><div class="n" id="sUs">16</div></div><div class="mid"><b id="sClock">2:30</b><span id="sDown">1st &amp; 10</span></div><div style="text-align:right"><div class="t" id="sOppName">BISON</div><div class="n" id="sThem">20</div></div></div>
+      <div class="goal">
+        <div class="row">Score a touchdown <span id="spot">Own 25</span></div>
+        <div class="bar"><i id="barFill" style="width:0"></i></div>
+        <div class="starsline" id="starsLine"></div>
+      </div>
+      <div class="field" id="field">
+        <div class="strip" id="strip"></div>
+        <div class="look" id="look">Defense shows <b>BLITZ</b><small>Extra rushers are coming.</small></div>
+        <div class="pop" id="pop"><b id="popBig"></b><span id="popSub"></span></div>
+      </div>
+      <div class="tipline" id="tipline"></div>
+      <div class="boost">
+        <button class="press locked" id="bTO" type="button"><b>3</b>Timeouts</button>
+        <button class="press" id="bHint" type="button"><b>?</b>Coach's hint<sup id="hintN">1</sup></button>
+        <button class="press locked" id="bHurry" type="button"><b>&#187;</b>Hurry-up</button>
+      </div>
+      <div class="plays" id="plays"></div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="screen" id="end">
+    <div class="rays"></div><div class="glow"></div><div class="confetti" id="confetti"></div>
+    <div class="endwrap">
+      <div class="bigstars" id="bigStars"></div>
+      <div class="headline" id="eHead">TOUCH<br>DOWN!</div>
+      <div class="card"><h4 id="eTitle">Crimson wins 23-20</h4><p id="eText"></p><div id="eStats"></div></div>
+      <div class="endbtns">
+        <button class="bigbtn gloss g-go press title" id="nextBtn">NEXT: WEEK 2</button>
+        <button class="linkbtn press" id="mapBtn" type="button">Back to the season map</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+'use strict';
+/* ============ RULES SNAPSHOT (from game.html + src/rules, 2026-11-21) ============ */
+let R=Math.random;
+function gauss(){let u=0;while(!u)u=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*R());}
+const PLAYS={
+  dive:{name:'HB Dive',kind:'run',cls:'run',sub:'Run, middle',ico:'M4 22 L18 22 L18 10 L26 10|M22 5 L27 10 L22 15'},
+  sweep:{name:'HB Sweep',kind:'run',cls:'run',sub:'Run, outside',ico:'M5 24 Q 5 8 24 8|M19 3 L25 8 L19 13'},
+  slants:{name:'Quick Slants',kind:'pass',cls:'pass',sub:'Pass, short',ico:'M5 25 L14 16 L25 16',dot:[25,16]},
+  post:{name:'Deep Post',kind:'pass',cls:'pass',sub:'Pass, deep',ico:'M5 27 L5 14 L22 4',dot:[23,4]},
+  pa:{name:'Play Action',kind:'pass',cls:'trick',sub:'Fake, then deep',ico:'M6 8 Q 26 8 18 18 Q 10 26 25 25'},
+  screen:{name:'RB Screen',kind:'pass',cls:'trick',sub:'Dump off',ico:'M24 6 L8 6 L8 22 L22 22',dot:[22,22]}
+};
+const RUN={dive:{box:[.5,2,.02],blitz:[3.5,4,.08],man:[4.2,2.5,.04],zone:[5.8,2,.03]},sweep:{box:[0,3,.03],blitz:[2,5,.1],man:[4.2,4,.06],zone:[6.2,3,.08]}};
+const PASS={slants:{box:[.76,7,3,.02,.01],blitz:[.82,10,5,.04,.01],man:[.55,6,3,.03,.03],zone:[.74,6,2,.02,.015]},
+  screen:{box:[.85,3,3,.03,.005],blitz:[.88,13,6,.03,.005],man:[.8,2,3,.03,.01],zone:[.87,7,3,.02,.005]},
+  pa:{box:[.74,17,5,.06,.02],blitz:[.45,11,4,.22,.03],man:[.58,12,4,.07,.03],zone:[.58,11,4,.06,.03]},
+  post:{box:[.5,30,7,.08,.04],blitz:[.38,30,8,.28,.05],man:[.42,29,7,.08,.05],zone:[.16,26,6,.06,.13]}};
+const MINY={slants:1,screen:-3,pa:6,post:15};
+const LOOKS={box:{name:'Stacked box',tip:'Loaded up to stop the run.',cb:5,lb:3,s:4},blitz:{name:'Blitz',tip:'Extra rushers are coming.',cb:1.8,lb:1.6,s:8},man:{name:'Man press',tip:'Tight on your receivers.',cb:1.8,lb:4.5,s:12},zone:{name:'Deep zone',tip:'Dropping back to guard the deep ball.',cb:8,lb:6,s:17}};
+const SECONDS={play:16,sack:18,incomplete:6,score:6};
+const DISGUISE=0.28;
+
+function pickDefense(G){
+  let w={box:25,blitz:25,man:25,zone:25};
+  if(G.toGo>=8&&G.down>=3)w={box:8,blitz:30,man:22,zone:40};else if(G.toGo<=2)w={box:45,blitz:25,man:20,zone:10};
+  if(G.ballOn>=88){w.zone=2;w.man+=15;} if(G.clock<50){w.zone+=20;w.box=Math.max(4,w.box-15);}
+  const k=Object.keys(w);let r=R()*k.reduce((a,x)=>a+w[x],0),def=k[0];for(const x of k){if((r-=w[x])<0){def=x;break;}}
+  let shown=def;if(R()<DISGUISE){const o=k.filter(x=>x!==def);shown=o[(R()*o.length)|0];}
+  return{def,shown};
+}
+function resolve(pk,def,ballOn){
+  const room=100-ballOn;let o;
+  if(RUN[pk]){const t=RUN[pk][def];let y=Math.round(t[0]+gauss()*t[1]);if(R()<t[2])y+=12+Math.round(R()*24);o={kind:'run',yards:Math.max(-4,y)};}
+  else{const t=PASS[pk][def];
+    if(R()<t[3])o={kind:'sack',yards:-(5+Math.round(R()*4))};
+    else if(R()<t[0])o={kind:'complete',yards:Math.max(MINY[pk]??1,Math.round(t[1]+gauss()*t[2]))};
+    else if(R()<t[4]/(1-t[0]))o={kind:'int',yards:0};
+    else o={kind:'incomplete',yards:0};}
+  if(o.yards>=room){o.yards=room;o.td=true;}
+  if(ballOn+o.yards<1)o.yards=1-ballOn;
+  return o;
+}
+// Expected yards of a play against a look: used only by the Coach's hint.
+function expect(pk,look){
+  if(RUN[pk]){const t=RUN[pk][look];return t[0]+t[2]*24;}
+  const t=PASS[pk][look];return t[0]*t[1]-t[3]*7-t[4]*25;
+}
+
+/* ============ SEASON ============ */
+const WEEKS=[
+  {opp:'Rams',  us:17,them:21,clock:180,ballOn:30},
+  {opp:'Owls',  us:10,them:14,clock:170,ballOn:25},
+  {opp:'Hawks', us:20,them:24,clock:160,ballOn:35},
+  {opp:'Wolves',us:13,them:17,clock:155,ballOn:25},
+  {opp:'Foxes', us:24,them:28,clock:150,ballOn:20},
+  {opp:'Bison', us:16,them:20,clock:150,ballOn:25},
+  {opp:'Comets',us:21,them:26,clock:140,ballOn:30},
+  {opp:'Pirates',us:7,them:12,clock:135,ballOn:25},
+  {opp:'Knights',us:27,them:31,clock:125,ballOn:30},
+  {opp:'Falcons',us:14,them:20,clock:120,ballOn:25},
+  {opp:'Storm', us:30,them:34,clock:110,ballOn:35},
+  {opp:'Rivals',us:20,them:26,clock:100,ballOn:25,rivalry:true}
+];
+const STAR_TIME=30, STAR_PLAYS=8;
+const SAVE_KEY='seasonTrail.v1';
+let save={stars:Array(WEEKS.length).fill(0),sound:true};
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s&&Array.isArray(s.stars))save=Object.assign(save,s);}catch(e){}
+function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
+const unlocked=()=>{let i=0;while(i<WEEKS.length-1&&save.stars[i]>0)i++;return i;};
+let week=unlocked();
+
+/* ============ SOUND (tiny WebAudio blips, no files) ============ */
+let ac=null;
+function tone(f,d=.09,type='triangle',v=.12,when=0){if(!save.sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime+when,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+.02);}catch(e){}}
+const sfx={tap:()=>tone(520,.06),good:()=>{tone(660,.1);tone(880,.14,'triangle',.12,.08)},bad:()=>tone(200,.18,'sine',.14),
+  first:()=>{tone(523,.1);tone(659,.1,'triangle',.12,.09);tone(784,.18,'triangle',.12,.18)},
+  td:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',.14,i*.12))},star:(i)=>tone(700+i*180,.16,'triangle',.14)};
+const buzz=(p)=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+
+/* ============ HELPERS ============ */
+const $=(id)=>document.getElementById(id);
+function tip(html,coach){const t=$('tipline');t.innerHTML='<span>'+html+'</span>';t.classList.toggle('coachy',!!coach);t.classList.remove('on');void t.offsetWidth;t.classList.add('on');}
+const clockText=(s)=>{const m=Math.max(0,Math.ceil(s));return((m/60)|0)+':'+String(m%60).padStart(2,'0');};
+const spotName=(b)=>b===50?'Midfield':b<50?'Own '+b:'Their '+(100-b);
+const atSpot=(b)=>b===50?'at midfield':b<50?'at your own '+b:'at their '+(100-b);
+const ord=(n)=>['1st','2nd','3rd','4th'][n-1];
+const downText=(G)=>ord(G.down)+' & '+(G.ballOn+G.toGo>=100?'Goal':G.toGo);
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));}
+const STAR_SVG=(sz,on)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.6 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="${on?'#ffd84d':'#ffffff55'}" stroke="${on?'#a66b00':'#ffffffaa'}" stroke-width="1.2"/></svg>`;
+
+/* ============ MAP ============ */
+function drawMap(){
+  const box=$('trail'),W=Math.min(480,window.innerWidth),stepY=118,top=120,bottomPad=250;
+  const H=top+stepY*(WEEKS.length-1)+bottomPad;box.style.height=H+'px';
+  const pts=WEEKS.map((w,i)=>{const y=H-bottomPad-i*stepY+40;const x=W/2+Math.sin(i*1.15)*(W*0.28);return[x,y];});
+  let d='M'+pts[0][0]+' '+(pts[0][1]+80);pts.forEach((p,i)=>{const prev=i?pts[i-1]:[p[0],p[1]+80];const cy=(prev[1]+p[1])/2;d+=` C ${prev[0]} ${cy}, ${p[0]} ${cy}, ${p[0]} ${p[1]}`;});
+  let h=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><path d="${d}" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#f3c7d0" stroke-width="5" stroke-dasharray="2 14" stroke-linecap="round"/></svg>`;
+  const cur=unlocked();
+  WEEKS.forEach((w,i)=>{const[x,y]=pts[i];const st=save.stars[i];const cls=i===week?'cur':st>0?'done':i<=cur?'done':'lock';
+    h+=`<button class="node ${cls} press" data-w="${i}" style="left:${x}px;top:${y}px" aria-label="Week ${i+1}">${i+1}</button>`;
+    if(st>0||i<cur)h+=`<div class="nstars" style="left:${x}px;top:${y+(i===week?42:33)}px">${[0,1,2].map(k=>k<st?'&#9733;':'<span class="off">&#9733;</span>').join('')}</div>`;
+    else h+=`<div class="wklabel" style="left:${x}px;top:${y+(i===week?44:35)}px">${w.rivalry?'RIVALRY':'vs '+w.opp}</div>`;});
+  box.innerHTML=h;
+  box.querySelectorAll('.node').forEach(b=>b.onclick=()=>{const i=+b.dataset.w;if(i>unlocked()){sfx.bad();return;}sfx.tap();week=i;drawMap();});
+  $('starTotal').textContent=save.stars.reduce((a,b)=>a+b,0);
+  const w=WEEKS[week];
+  $('wkTitle').textContent=(w.rivalry?'Rivalry Week':'Week '+(week+1))+' vs '+w.opp;
+  $('wkSub').textContent='Down '+(w.them-w.us)+', '+clockText(w.clock)+' left';
+  $('wkNeed').innerHTML='Need a TD<br>'+spotName(w.ballOn);
+  $('playBtn').textContent='PLAY WEEK '+(week+1);
+  requestAnimationFrame(()=>{const sc=$('mapScroll');sc.scrollTop=pts[week][1]-sc.clientHeight*0.42;});
+}
+$('playBtn').onclick=()=>{sfx.tap();startDrive();};
+$('muteBtn').onclick=()=>{save.sound=!save.sound;persist();$('muteBtn').textContent='Sound: '+(save.sound?'on':'off');sfx.tap();};
+$('muteBtn').textContent='Sound: '+(save.sound?'on':'off');
+
+/* ============ DRIVE ============ */
+let G=null;
+function startDrive(){
+  const w=WEEKS[week];
+  G={opp:w.opp,us:w.us,them:w.them,clock:w.clock,ballOn:w.ballOn,start:w.ballOn,down:1,toGo:10,plays:0,hints:1,busy:false,neg:0};
+  $('sOppName').textContent=w.opp.toUpperCase();
+  buildPlays();newDown();show('play');
+}
+function buildPlays(){
+  $('plays').innerHTML=Object.entries(PLAYS).map(([k,p])=>{
+    const paths=p.ico.split('|').map(d=>`<path d="${d}" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+    const dot=p.dot?`<circle cx="${p.dot[0]}" cy="${p.dot[1]}" r="3" fill="#fff"/>`:'';
+    return `<button class="pb gloss ${p.cls} press" data-k="${k}" type="button"><svg width="30" height="30" viewBox="0 0 30 30">${paths}${dot}</svg><div>${p.name}<small>${p.sub}</small></div></button>`;}).join('');
+  $('plays').querySelectorAll('.pb').forEach(b=>b.onclick=()=>runPlay(b.dataset.k));
+}
+function newDown(){
+  Object.assign(G,pickDefense(G));
+  $('plays').querySelectorAll('.pb').forEach(b=>b.classList.remove('coach'));
+  tip(LOOKS[G.shown].tip+' Pick a play.');
+  hud();drawField(G.ballOn);
+}
+function hud(){
+  $('sUs').textContent=G.us;$('sThem').textContent=G.them;$('sClock').textContent=clockText(G.clock);$('sDown').textContent=downText(G);
+  $('spot').textContent=spotName(G.ballOn);
+  $('barFill').style.width=Math.max(3,(G.ballOn-G.start)/(100-G.start)*100)+'%';
+  const timeOk=G.clock>=STAR_TIME,playsOk=G.plays<STAR_PLAYS;
+  $('starsLine').innerHTML=`<em>&#9733; Score</em><em class="${timeOk?'':'lost'}">&#9733; 0:${STAR_TIME} left</em><em class="${playsOk?'':'lost'}">&#9733; ${STAR_PLAYS} plays max (${G.plays} used)</em>`;
+  const L=LOOKS[G.shown];$('look').innerHTML=`Defense shows <b>${L.name.toUpperCase()}</b><small>${L.tip}</small>`;
+  $('hintN').textContent=G.hints;$('bHint').classList.toggle('used',G.hints<1);
+}
+// Field window: 30 yards, from 8 behind the line of scrimmage.
+function drawField(los,animateFrom){
+  const f=$('field'),W=f.clientWidth,H=f.clientHeight,span=30,px=W/span;
+  const left=Math.min(Math.max(los-8,-10),100-span+10); // allow end zone in view
+  const X=(yd)=>(yd-left)*px;
+  let h='';
+  if(X(100)<W)h+=`<div class="ez" style="left:${X(100)}px;width:${10*px}px"><span>TOUCHDOWN</span></div>`;
+  if(X(0)>0)h+=`<div class="ez" style="left:${X(-10)}px;width:${10*px}px;opacity:.5"></div>`;
+  for(let y=Math.ceil(left/5)*5;y<=left+span;y+=5){if(y<0||y>100)continue;h+=`<div class="yl" style="left:${X(y)}px"></div>`;
+    if(y%10===0&&y>0&&y<100)h+=`<div class="yn" style="left:${X(y)}px">${y<=50?y:100-y}</div>`;}
+  const fdy=Math.min(100,los+G.toGo);
+  h+=`<div class="los" style="left:${X(los)}px"></div>`;if(fdy<100)h+=`<div class="fd" style="left:${X(fdy)}px"></div>`;
+  // players
+  const L=LOOKS[G.shown],mid=H*0.53,sp=H*0.1;
+  const us=[[-.6,0],[-.6,-1],[-.6,1],[-.6,-2],[-.6,2],[-4.5,0],[-6.5,0],[-1,-3.4],[-1,3.4]];
+  const them=[[1,-1.5],[1,-.5],[1,.5],[1,1.5],[L.lb,-1],[L.lb,1],[L.cb,-3.4],[L.cb,3.4],[L.s,-1.6],[L.s,1.6]];
+  us.forEach(([dx,dz])=>h+=`<i class="dot us" style="left:${X(los+dx)}px;top:${mid+dz*sp}px"></i>`);
+  them.forEach(([dx,dz])=>h+=`<i class="dot them" style="left:${X(los+dx)}px;top:${mid+dz*sp}px"></i>`);
+  h+=`<div class="ball" id="ballEl" style="left:${X(animateFrom??los)-0}px;top:${mid}px"></div>`;
+  $('strip').innerHTML=h;
+}
+function moveBall(toYd,ms=650){
+  const f=$('field'),W=f.clientWidth,px=W/30,b=$('ballEl');if(!b)return;
+  const left=parseFloat(b.style.left);const dx=(toYd-G.ballOn)*px;
+  b.style.transition=`left ${ms}ms cubic-bezier(.3,.9,.4,1)`;b.style.left=(left+dx)+'px';
+}
+function popText(big,sub,bad){
+  const p=$('pop');$('popBig').textContent=big;$('popSub').textContent=sub||'';$('popSub').style.display=sub?'inline-block':'none';
+  p.className='pop'+(bad?' bad':'');void p.offsetWidth;p.classList.add('show');
+}
+function runPlay(k){
+  if(G.busy)return;G.busy=true;sfx.tap();buzz(12);
+  $('plays').classList.add('busy');tip('Hut! '+PLAYS[k].name+'...');
+  const o=resolve(k,G.def,G.ballOn);G.plays++;
+  const disguised=G.def!==G.shown;
+  const why='They ran '+LOOKS[G.def].name.toLowerCase()+(disguised?'. It was a disguise.':'.');
+  let big,sub='',bad=false,used=SECONDS.play,over=null,first=false;
+  if(o.kind==='int'){big='Picked off!';bad=true;over='int';}
+  else if(o.kind==='incomplete'){big='Incomplete';bad=true;used=SECONDS.incomplete;}
+  else{
+    const y=o.yards;
+    if(o.kind==='sack'){big='Sacked';sub='Loss of '+(-y);bad=true;used=SECONDS.sack;}
+    else{big=y>0?'+'+y+' yards':y===0?'No gain':'Loss of '+(-y);bad=y<=0;}
+    if(o.td){big='TOUCHDOWN!';sub='';bad=false;used=SECONDS.score;over='td';}
+    else if(y>=G.toGo){first=true;sub='First down!';}
+  }
+  moveBall(G.ballOn+o.yards);
+  setTimeout(()=>{
+    popText(big,sub,bad);
+    if(over==='td'){sfx.td();buzz([30,40,60]);}else if(first){sfx.first();buzz(25);}else if(bad)sfx.bad();else sfx.good();
+  },420);
+  // apply to state
+  G.ballOn+=o.yards;G.clock-=used;
+  if(over!=='td'&&over!=='int'){
+    if(first){G.down=1;G.toGo=Math.min(10,100-G.ballOn);}
+    else{G.toGo-=o.yards;G.down++;if(G.down>4){G.down=4;over='downs';}}
+  }
+  if(!over&&G.clock<=0){G.clock=0;over='clock';}
+  if(over==='td'){G.us+=6;}
+  G.clock=Math.max(0,G.clock);
+  const wait=over?1700:1500;
+  setTimeout(()=>{hud();tip(why);},700);
+  setTimeout(()=>{
+    $('pop').className='pop';$('plays').classList.remove('busy');G.busy=false;
+    if(over)endDrive(over,G.clock+(over==='td'?used:0));else newDown();
+  },wait+(sub&&!first?0:0));
+}
+$('bHint').onclick=()=>{
+  if(G.busy)return;
+  if(G.hints<1){tip('You already used your coach\'s hint this drive.');sfx.bad();return;}
+  G.hints--;sfx.good();
+  let best=null,bv=-99;for(const k in PLAYS){const v=expect(k,G.shown);if(v>bv){bv=v;best=k;}}
+  const b=$('plays').querySelector(`[data-k="${best}"]`);b.classList.add('coach');
+  tip(`Coach: vs a ${LOOKS[G.shown].name.toLowerCase()} look, I like <b>${PLAYS[best].name}</b>. They might be bluffing.`,true);hud();
+};
+const lockedMsg=()=>{tip('Timeouts and the hurry-up arrive with the clock update.');sfx.bad();};
+$('bTO').onclick=lockedMsg;$('bHurry').onclick=lockedMsg;
+
+/* ============ END ============ */
+function endDrive(how,timeLeftBeforeScore){
+  const w=WEEKS[week],win=how==='td';
+  const tLeft=G.clock;
+  const stars=win?1+(tLeft>=STAR_TIME?1:0)+(G.plays<=STAR_PLAYS?1:0):0;
+  const end=$('end');end.classList.toggle('lose',!win);
+  $('bigStars').innerHTML=win?[0,1,2].map(i=>STAR_SVG(i===1?96:74,i<stars)).join(''):'';
+  $('eHead').innerHTML=win?'TOUCH<br>DOWN!':({int:'Picked<br>off',downs:'So<br>close!',clock:'Out of<br>time'})[how];
+  $('eHead').style.animation='none';void $('eHead').offsetWidth;$('eHead').style.animation='';
+  $('eTitle').textContent=win?`Crimson wins ${G.us}-${G.them}`:`${w.opp} win ${G.them}-${G.us}`;
+  const yards=G.ballOn-G.start;
+  $('eText').textContent=win?'':({int:'Their defense picked it off. One more try?',downs:'You came up short on 4th down '+atSpot(G.ballOn)+'.',clock:'The clock hit zero '+atSpot(G.ballOn)+'.'})[how];
+  const row=(a,b,ok)=>`<div class="st">${a}<b class="${ok===undefined?'':ok?'ok':'no'}">${b}</b></div>`;
+  $('eStats').innerHTML=row('Drive',yards+' yds, '+G.plays+' plays')+(win?row('Time left',clockText(tLeft)+(tLeft>=STAR_TIME?' &#9733;':' (needed 0:'+STAR_TIME+')'),tLeft>=STAR_TIME)+row('Plays',G.plays+(G.plays<=STAR_PLAYS?' &#9733;':' (needed '+STAR_PLAYS+')'),G.plays<=STAR_PLAYS):'');
+  if(win&&stars>save.stars[week]){save.stars[week]=stars;persist();}
+  const hasNext=win&&week<WEEKS.length-1;
+  $('nextBtn').textContent=win?(hasNext?'NEXT: WEEK '+(week+2):'SEASON COMPLETE!'):'TRY AGAIN';
+  $('nextBtn').className='bigbtn gloss press title '+(win?'g-go':'g-gold');
+  $('nextBtn').onclick=()=>{sfx.tap();if(win){if(hasNext)week++;show('map');drawMap();}else startDrive();};
+  show('end');
+  if(win){confetti();[0,1,2].forEach(i=>setTimeout(()=>{const s=$('bigStars').children[i];if(s){s.classList.add('in');if(i<stars)sfx.star(i);}},450+i*320));}
+  else [0,1,2].forEach(()=>{});
+}
+$('mapBtn').onclick=()=>{sfx.tap();show('map');drawMap();};
+function confetti(){
+  const c=$('confetti');let h='';const cols=['#fff','#ffd84d','#ffffff','#ffe1e6'];
+  for(let i=0;i<46;i++){h+=`<i style="left:${Math.random()*100}%;background:${cols[i%4]};animation-duration:${1.8+Math.random()*1.8}s;animation-delay:${Math.random()*.8}s;transform:rotate(${Math.random()*180}deg)"></i>`;}
+  c.innerHTML=h;
+}
+
+/* ============ BOOT ============ */
+drawMap();
+window.addEventListener('resize',()=>{if($('map').classList.contains('on'))drawMap();else if(G&&!G.busy)drawField(G.ballOn);});
+// Test hook: ?seed=n makes outcomes repeatable; ?screen=play|end jumps for screenshots.
+(function(){const q=new URLSearchParams(location.search);const s=+q.get('seed');if(s){let x=s;R=()=>(x=(x*16807)%2147483647)/2147483647;}
+  if(q.get('week'))week=Math.min(WEEKS.length-1,+q.get('week')-1),drawMap();
+  if(q.get('screen')==='play')startDrive();
+  if(q.get('screen')==='end'){startDrive();G.ballOn=100;G.us+=6;G.plays=7;G.clock=41;endDrive('td');}
+  if(q.get('screen')==='lose'){startDrive();G.ballOn=62;G.plays=11;G.clock=0;endDrive('clock');}
+})();
+</script>
+</body>
+</html>
